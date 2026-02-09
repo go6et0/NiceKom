@@ -1,0 +1,102 @@
+// Prisma schema for the app
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProductType {
+  OIL
+  GREASE
+}
+
+enum Unit {
+  LITERS
+  KILOGRAMS
+}
+
+enum BaseOil {
+  MINERAL
+  SEMI_SYNTHETIC
+  SYNTHETIC
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+}
+
+model User {
+  id                      String   @id @default(cuid())
+  name                    String?
+  email                   String   @unique
+  password                String
+  emailVerified           DateTime?
+  emailVerifyToken        String?
+  emailVerifyTokenExpires DateTime?
+  role                    Role     @default(USER)
+  createdAt               DateTime @default(now())
+
+  orders Order[]
+}
+
+model Product {
+  id               String      @id @default(cuid())
+  name             String
+  brand            String
+  shortDescription String
+  description      String
+  advantages       String[]
+  type             ProductType
+  viscosity        String
+  unit             Unit
+  packageSize      Decimal     @db.Decimal(10, 2)
+  application      String?
+  certification    String?
+  baseOil          BaseOil?
+  operatingTempMin Int?
+  operatingTempMax Int?
+  price            Decimal     @db.Decimal(10, 2)
+  quantity         Int
+  images           String[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  total     Decimal     @db.Decimal(10, 2)
+  status    OrderStatus @default(PENDING)
+  customerName    String   @default("")
+  customerEmail   String   @default("")
+  customerPhone   String   @default("")
+  customerAddress String   @default("")
+  createdAt DateTime    @default(now())
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String?
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  quantity  Int
+
+  order   Order    @relation(fields: [orderId], references: [id])
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
