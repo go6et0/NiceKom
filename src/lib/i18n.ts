@@ -465,10 +465,24 @@ const dictionary = {
   },
 } as const;
 
-export type Dictionary = typeof dictionary.en;
+type DeepStringify<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends Array<infer U>
+      ? U extends string
+        ? string[]
+        : Array<DeepStringify<U>>
+      : T[K] extends object
+        ? DeepStringify<T[K]>
+        : T[K];
+};
+
+export type Dictionary = DeepStringify<typeof dictionary.en>;
+
+const dictionaries: Record<Locale, Dictionary> = dictionary;
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionary[locale] ?? dictionary[defaultLocale];
+  return dictionaries[locale] ?? dictionaries[defaultLocale];
 }
 
 export function isLocale(value: string | undefined): value is Locale {
