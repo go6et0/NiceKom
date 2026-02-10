@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return NextResponse.json(
-      { error: "An account with this email already exists." },
+      { error: "EMAIL_EXISTS" },
       { status: 400 }
     );
   }
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const token = createEmailVerifyToken();
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       name,
       email,
@@ -49,7 +49,17 @@ export async function POST(request: Request) {
     },
   });
 
-  await sendVerificationEmail(email, token);
+  try {
+    await sendVerificationEmail(email, token);
+  } catch {
+    await prisma.user
+      .delete({ where: { id: user.id } })
+      .catch(() => undefined);
+    return NextResponse.json(
+      { error: "EMAIL_SEND_FAILED" },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

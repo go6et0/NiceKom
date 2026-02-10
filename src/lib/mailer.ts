@@ -15,6 +15,9 @@ function createTransporter() {
     host,
     port: Number(port),
     auth: { user, pass },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
   });
 }
 

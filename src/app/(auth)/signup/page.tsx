@@ -27,20 +27,46 @@ export default function SignupPage() {
       return;
     }
 
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: formData.get("name")?.toString(),
-        email: formData.get("email")?.toString(),
-        password,
-        confirmPassword,
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort();
+    }, 12000);
+
+    let response: Response;
+    try {
+      response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name")?.toString(),
+          email: formData.get("email")?.toString(),
+          password,
+          confirmPassword,
+        }),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        setMessage({ type: "error", text: t.auth.requestTimeout });
+      } else {
+        setMessage({ type: "error", text: t.auth.signupError });
+      }
+      setLoading(false);
+      window.clearTimeout(timeoutId);
+      return;
+    }
+    window.clearTimeout(timeoutId);
 
     if (!response.ok) {
       const data = await response.json();
-      setMessage({ type: "error", text: data.error || t.auth.signupError });
+      const errorCode = data.error as string | undefined;
+      const errorText =
+        errorCode === "EMAIL_SEND_FAILED"
+          ? t.auth.signupEmailError
+          : errorCode === "EMAIL_EXISTS"
+          ? t.auth.signupExists
+          : data.error || t.auth.signupError;
+      setMessage({ type: "error", text: errorText });
     } else {
       setMessage({ type: "success", text: t.auth.signupSuccess });
       (event.target as HTMLFormElement).reset();
