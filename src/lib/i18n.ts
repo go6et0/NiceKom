@@ -68,7 +68,6 @@ const dictionary = {
       passwordPlaceholder: "Password",
       confirmPasswordPlaceholder: "Confirm password",
       invalidCredentials: "Invalid credentials or unverified email.",
-      confirmPasswordPlaceholder: "???????? ??????",
       signingIn: "Signing in...",
       loginButton: "Login",
       signupTitle: "Sign Up",
@@ -305,6 +304,7 @@ const dictionary = {
       loginLoading: "Зареждане на формата...",
       emailPlaceholder: "Имейл",
       passwordPlaceholder: "Парола",
+      confirmPasswordPlaceholder: "Потвърди парола",
       invalidCredentials: "Невалидни данни или непотвърден имейл.",
       signingIn: "Влизане...",
       loginButton: "Вход",
@@ -314,8 +314,9 @@ const dictionary = {
       createAccount: "Създай профил",
       creating: "Създаване...",
       signupError: "Неуспешно създаване на профил.",
-      signupSuccess: "?????????? ????? ?? ????????????. ????????? ????????? ???? ? ????.",
-      passwordMismatch: "???????? ?? ????????.",
+      signupSuccess:
+        "Изпратихме имейл за потвърждение. Проверете входящата поща и спам.",
+      passwordMismatch: "Паролите не съвпадат.",
     },
     cart: {
       title: "Вашата количка",
