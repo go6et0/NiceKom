@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
+export type ProductFormState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+};
+
 const productSchema = z.object({
   name: z.string().min(2),
   brand: z.string().min(2),
@@ -109,28 +114,53 @@ function parseProductForm(formData: FormData) {
   };
 }
 
-export async function createProduct(formData: FormData) {
-  const data = parseProductForm(formData);
+export async function createProduct(
+  _prevState: ProductFormState,
+  formData: FormData
+): Promise<ProductFormState> {
+  try {
+    const data = parseProductForm(formData);
 
-  await prisma.product.create({
-    data,
-  });
+    await prisma.product.create({
+      data,
+    });
 
-  revalidatePath("/");
-  revalidatePath("/admin/products");
+    revalidatePath("/");
+    revalidatePath("/admin/products");
+
+    return { status: "success" };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Unable to save product.",
+    };
+  }
 }
 
-export async function updateProduct(productId: string, formData: FormData) {
-  const data = parseProductForm(formData);
+export async function updateProduct(
+  productId: string,
+  _prevState: ProductFormState,
+  formData: FormData
+): Promise<ProductFormState> {
+  try {
+    const data = parseProductForm(formData);
 
-  await prisma.product.update({
-    where: { id: productId },
-    data,
-  });
+    await prisma.product.update({
+      where: { id: productId },
+      data,
+    });
 
-  revalidatePath("/");
-  revalidatePath("/admin/products");
-  revalidatePath(`/products/${productId}`);
+    revalidatePath("/");
+    revalidatePath("/admin/products");
+    revalidatePath(`/products/${productId}`);
+
+    return { status: "success" };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Unable to save product.",
+    };
+  }
 }
 
 export async function deleteProduct(productId: string) {

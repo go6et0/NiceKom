@@ -52,6 +52,8 @@ export default async function EditProductPage({
         }}
         action={updateProduct.bind(null, product.id)}
         submitLabel={t.admin.updateProduct}
+        successMessage={t.admin.productUpdated}
+        errorMessage={t.admin.productSaveError}
       />
     </div>
   );

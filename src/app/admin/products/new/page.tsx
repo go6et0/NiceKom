@@ -9,7 +9,13 @@ export default async function NewProductPage() {
 
   return (
     <div className="max-w-3xl">
-      <ProductForm action={createProduct} submitLabel={t.admin.createProduct} />
+      <ProductForm
+        action={createProduct}
+        submitLabel={t.admin.createProduct}
+        successMessage={t.admin.productCreated}
+        errorMessage={t.admin.productSaveError}
+        resetOnSuccess
+      />
     </div>
   );
 }

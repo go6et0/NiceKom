@@ -7,14 +7,25 @@ import { useLocale } from "@/components/site/locale-provider";
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const { t } = useLocale();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    const password = formData.get("password")?.toString() ?? "";
+    const confirmPassword = formData.get("confirmPassword")?.toString() ?? "";
     setLoading(true);
     setMessage(null);
+
+    if (password !== confirmPassword) {
+      setMessage({ type: "error", text: t.auth.passwordMismatch });
+      setLoading(false);
+      return;
+    }
 
     const response = await fetch("/api/auth/register", {
       method: "POST",
@@ -22,15 +33,16 @@ export default function SignupPage() {
       body: JSON.stringify({
         name: formData.get("name")?.toString(),
         email: formData.get("email")?.toString(),
-        password: formData.get("password")?.toString(),
+        password,
+        confirmPassword,
       }),
     });
 
     if (!response.ok) {
       const data = await response.json();
-      setMessage(data.error || t.auth.signupError);
+      setMessage({ type: "error", text: data.error || t.auth.signupError });
     } else {
-      setMessage(t.auth.signupSuccess);
+      setMessage({ type: "success", text: t.auth.signupSuccess });
       (event.target as HTMLFormElement).reset();
     }
     setLoading(false);
@@ -61,7 +73,23 @@ export default function SignupPage() {
           placeholder={t.auth.passwordPlaceholder}
           required
         />
-        {message && <p className="text-sm text-muted-foreground">{message}</p>}
+        <Input
+          name="confirmPassword"
+          type="password"
+          placeholder={t.auth.confirmPasswordPlaceholder}
+          required
+        />
+        {message ? (
+          <div
+            className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+              message.type === "success"
+                ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
+                : "border-destructive/40 bg-destructive/10 text-destructive"
+            }`}
+          >
+            {message.text}
+          </div>
+        ) : null}
         <Button type="submit" disabled={loading}>
           {loading ? t.auth.creating : t.auth.createAccount}
         </Button>

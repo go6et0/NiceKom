@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormState } from "react-dom";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,14 +42,23 @@ type ProductFormValues = {
 
 type ProductFormProps = {
   defaultValues?: ProductFormValues;
-  action: (formData: FormData) => void;
+  action: (
+    prevState: { status: "idle" | "success" | "error"; message?: string },
+    formData: FormData
+  ) => Promise<{ status: "idle" | "success" | "error"; message?: string }>;
   submitLabel: string;
+  successMessage?: string;
+  errorMessage?: string;
+  resetOnSuccess?: boolean;
 };
 
 export default function ProductForm({
   defaultValues,
   action,
   submitLabel,
+  successMessage,
+  errorMessage,
+  resetOnSuccess = false,
 }: ProductFormProps) {
   const { t } = useLocale();
   const formLabels = t.admin.productForm;
@@ -68,6 +78,8 @@ export default function ProductForm({
   >(defaultValues?.baseOil ?? "NONE");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formState, formAction] = useFormState(action, { status: "idle" });
 
   const advantagesText = useMemo(
     () => defaultValues?.advantages?.join("\n") ?? "",
@@ -77,6 +89,15 @@ export default function ProductForm({
     () => defaultValues?.advantagesBg?.join("\n") ?? "",
     [defaultValues?.advantagesBg]
   );
+
+  useEffect(() => {
+    if (formState.status !== "success" || !resetOnSuccess) return;
+    formRef.current?.reset();
+    setImages([]);
+    setType("OIL");
+    setUnit("LITERS");
+    setBaseOil("NONE");
+  }, [formState.status, resetOnSuccess]);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -120,7 +141,8 @@ export default function ProductForm({
 
   return (
     <form
-      action={action}
+      ref={formRef}
+      action={formAction}
       className="grid gap-6 rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm"
     >
       <div className="grid gap-2">
@@ -432,6 +454,16 @@ export default function ProductForm({
           <input key={src} type="hidden" name="images" value={src} />
         ))}
       </div>
+      {formState.status === "success" && successMessage ? (
+        <div className="rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-100">
+          {successMessage}
+        </div>
+      ) : null}
+      {formState.status === "error" ? (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          {formState.message ?? errorMessage ?? t.admin.productSaveError}
+        </div>
+      ) : null}
       <Button type="submit" disabled={!canSubmit}>
         {uploading ? formLabels.uploading : submitLabel}
       </Button>
