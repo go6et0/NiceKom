@@ -52,16 +52,22 @@ model User {
 model Product {
   id               String      @id @default(cuid())
   name             String
+  nameBg           String?
   brand            String
   shortDescription String
+  shortDescriptionBg String?
   description      String
+  descriptionBg    String?
   advantages       String[]
+  advantagesBg     String[]?
   type             ProductType
   viscosity        String
   unit             Unit
   packageSize      Decimal     @db.Decimal(10, 2)
   application      String?
+  applicationBg    String?
   certification    String?
+  certificationBg  String?
   baseOil          BaseOil?
   operatingTempMin Int?
   operatingTempMax Int?

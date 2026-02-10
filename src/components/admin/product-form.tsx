@@ -17,16 +17,22 @@ import { useLocale } from "@/components/site/locale-provider";
 
 type ProductFormValues = {
   name: string;
+  nameBg?: string;
   brand: string;
   shortDescription: string;
+  shortDescriptionBg?: string;
   description: string;
+  descriptionBg?: string;
   advantages: string[];
+  advantagesBg?: string[];
   type: "OIL" | "GREASE";
   viscosity: string;
   unit: "LITERS" | "KILOGRAMS";
   packageSize: number;
   application?: string | null;
+  applicationBg?: string | null;
   certification?: string | null;
+  certificationBg?: string | null;
   baseOil?: "MINERAL" | "SEMI_SYNTHETIC" | "SYNTHETIC" | null;
   operatingTempMin?: number | null;
   operatingTempMax?: number | null;
@@ -48,6 +54,8 @@ export default function ProductForm({
 }: ProductFormProps) {
   const { t } = useLocale();
   const formLabels = t.admin.productForm;
+  const labelSuffixEn = formLabels.languageEnSuffix ?? "";
+  const labelSuffixBg = formLabels.languageBgSuffix ?? "";
   const [images, setImages] = useState<string[]>(
     defaultValues?.images ?? []
   );
@@ -66,6 +74,10 @@ export default function ProductForm({
   const advantagesText = useMemo(
     () => defaultValues?.advantages?.join("\n") ?? "",
     [defaultValues?.advantages]
+  );
+  const advantagesBgText = useMemo(
+    () => defaultValues?.advantagesBg?.join("\n") ?? "",
+    [defaultValues?.advantagesBg]
   );
 
   const handleFiles = async (files: FileList | null) => {
@@ -114,7 +126,10 @@ export default function ProductForm({
       className="grid gap-6 rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm"
     >
       <div className="grid gap-2">
-        <Label htmlFor="name">{formLabels.productName}</Label>
+        <Label htmlFor="name">
+          {formLabels.productName}
+          {labelSuffixEn}
+        </Label>
         <Input
           id="name"
           name="name"
@@ -132,7 +147,10 @@ export default function ProductForm({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="shortDescription">{formLabels.shortDescription}</Label>
+        <Label htmlFor="shortDescription">
+          {formLabels.shortDescription}
+          {labelSuffixEn}
+        </Label>
         <Input
           id="shortDescription"
           name="shortDescription"
@@ -141,7 +159,10 @@ export default function ProductForm({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="description">{formLabels.fullDescription}</Label>
+        <Label htmlFor="description">
+          {formLabels.fullDescription}
+          {labelSuffixEn}
+        </Label>
         <Textarea
           id="description"
           name="description"
@@ -151,13 +172,62 @@ export default function ProductForm({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="advantages">{formLabels.advantages}</Label>
+        <Label htmlFor="advantages">
+          {formLabels.advantages}
+          {labelSuffixEn}
+        </Label>
         <Textarea
           id="advantages"
           name="advantages"
           rows={4}
           defaultValue={advantagesText}
           required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="nameBg">
+          {formLabels.productName}
+          {labelSuffixBg}
+        </Label>
+        <Input
+          id="nameBg"
+          name="nameBg"
+          defaultValue={defaultValues?.nameBg}
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="shortDescriptionBg">
+          {formLabels.shortDescription}
+          {labelSuffixBg}
+        </Label>
+        <Input
+          id="shortDescriptionBg"
+          name="shortDescriptionBg"
+          defaultValue={defaultValues?.shortDescriptionBg}
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="descriptionBg">
+          {formLabels.fullDescription}
+          {labelSuffixBg}
+        </Label>
+        <Textarea
+          id="descriptionBg"
+          name="descriptionBg"
+          rows={5}
+          defaultValue={defaultValues?.descriptionBg}
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="advantagesBg">
+          {formLabels.advantages}
+          {labelSuffixBg}
+        </Label>
+        <Textarea
+          id="advantagesBg"
+          name="advantagesBg"
+          rows={4}
+          defaultValue={advantagesBgText}
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
@@ -221,7 +291,10 @@ export default function ProductForm({
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="application">{formLabels.application}</Label>
+          <Label htmlFor="application">
+            {formLabels.application}
+            {labelSuffixEn}
+          </Label>
           <Input
             id="application"
             name="application"
@@ -230,11 +303,40 @@ export default function ProductForm({
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="certification">{formLabels.certification}</Label>
+          <Label htmlFor="certification">
+            {formLabels.certification}
+            {labelSuffixEn}
+          </Label>
           <Input
             id="certification"
             name="certification"
             defaultValue={defaultValues?.certification ?? ""}
+            placeholder={formLabels.certificationPlaceholder}
+          />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-2">
+          <Label htmlFor="applicationBg">
+            {formLabels.application}
+            {labelSuffixBg}
+          </Label>
+          <Input
+            id="applicationBg"
+            name="applicationBg"
+            defaultValue={defaultValues?.applicationBg ?? ""}
+            placeholder={formLabels.applicationPlaceholder}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="certificationBg">
+            {formLabels.certification}
+            {labelSuffixBg}
+          </Label>
+          <Input
+            id="certificationBg"
+            name="certificationBg"
+            defaultValue={defaultValues?.certificationBg ?? ""}
             placeholder={formLabels.certificationPlaceholder}
           />
         </div>

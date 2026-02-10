@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { getLocale } from "@/lib/locale";
+import { getProductText } from "@/lib/product-text";
 
 const orderSchema = z.object({
   customerName: z.string().min(2),
@@ -23,6 +25,7 @@ export async function POST(request: Request) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const locale = await getLocale();
 
   const body = await request.json().catch(() => null);
   const parsed = orderSchema.safeParse(body);
@@ -43,9 +46,10 @@ export async function POST(request: Request) {
   const productMap = new Map(products.map((p) => [p.id, p]));
   for (const item of items) {
     const product = productMap.get(item.productId);
+    const text = product ? getProductText(product, locale) : null;
     if (!product || product.quantity < item.quantity) {
       return NextResponse.json(
-        { error: `Not enough stock for ${product?.name ?? "product"}.` },
+        { error: `Not enough stock for ${text?.name ?? "product"}.` },
         { status: 400 }
       );
     }
@@ -75,9 +79,10 @@ export async function POST(request: Request) {
         items: {
           create: items.map((item) => {
             const product = productMap.get(item.productId)!;
+            const text = getProductText(product, locale);
             return {
               productId: product.id,
-              name: product.name,
+              name: text.name,
               price: product.price,
               quantity: item.quantity,
             };

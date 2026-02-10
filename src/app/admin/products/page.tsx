@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { deleteProduct } from "@/app/admin/products/actions";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
+import { getProductText } from "@/lib/product-text";
 
 export default async function ProductsPage() {
   const locale = await getLocale();
@@ -25,13 +26,15 @@ export default async function ProductsPage() {
         <p className="mt-4 text-sm text-muted-foreground">{t.admin.noProducts}</p>
       ) : (
         <div className="mt-4 space-y-4">
-          {products.map((product) => (
-            <div
+          {products.map((product) => {
+            const text = getProductText(product, locale);
+            return (
+              <div
               key={product.id}
               className="flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0"
             >
               <div>
-                <p className="font-semibold">{product.name}</p>
+                <p className="font-semibold">{text.name}</p>
                 <p className="text-muted-foreground">
                   {product.brand} • {t.product.type[product.type]} •{" "}
                   {product.quantity} {t.admin.inStock}
@@ -47,8 +50,9 @@ export default async function ProductsPage() {
                   </Button>
                 </form>
               </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

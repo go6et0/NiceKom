@@ -6,16 +6,22 @@ import { prisma } from "@/lib/prisma";
 
 const productSchema = z.object({
   name: z.string().min(2),
+  nameBg: z.string().min(2).optional(),
   brand: z.string().min(2),
   shortDescription: z.string().min(10),
+  shortDescriptionBg: z.string().min(10).optional(),
   description: z.string().min(20),
+  descriptionBg: z.string().min(20).optional(),
   advantages: z.string().min(3),
+  advantagesBg: z.string().min(3).optional(),
   type: z.enum(["OIL", "GREASE"]),
   viscosity: z.string().min(1),
   unit: z.enum(["LITERS", "KILOGRAMS"]),
   packageSize: z.coerce.number().positive(),
   application: z.string().min(2).optional(),
+  applicationBg: z.string().min(2).optional(),
   certification: z.string().min(2).optional(),
+  certificationBg: z.string().min(2).optional(),
   baseOil: z.enum(["MINERAL", "SEMI_SYNTHETIC", "SYNTHETIC"]).optional(),
   operatingTempMin: z.coerce.number().int().optional(),
   operatingTempMax: z.coerce.number().int().optional(),
@@ -37,16 +43,22 @@ function normalizeNumber(value: FormDataEntryValue | null) {
 function parseProductForm(formData: FormData) {
   const raw = {
     name: normalizeText(formData.get("name")),
+    nameBg: normalizeText(formData.get("nameBg")),
     brand: normalizeText(formData.get("brand")),
     shortDescription: normalizeText(formData.get("shortDescription")),
+    shortDescriptionBg: normalizeText(formData.get("shortDescriptionBg")),
     description: normalizeText(formData.get("description")),
+    descriptionBg: normalizeText(formData.get("descriptionBg")),
     advantages: normalizeText(formData.get("advantages")),
+    advantagesBg: normalizeText(formData.get("advantagesBg")),
     type: normalizeText(formData.get("type")),
     viscosity: normalizeText(formData.get("viscosity")),
     unit: normalizeText(formData.get("unit")),
     packageSize: normalizeNumber(formData.get("packageSize")),
     application: normalizeText(formData.get("application")),
+    applicationBg: normalizeText(formData.get("applicationBg")),
     certification: normalizeText(formData.get("certification")),
+    certificationBg: normalizeText(formData.get("certificationBg")),
     baseOil: normalizeText(formData.get("baseOil")),
     operatingTempMin: normalizeNumber(formData.get("operatingTempMin")),
     operatingTempMax: normalizeNumber(formData.get("operatingTempMax")),
@@ -55,16 +67,29 @@ function parseProductForm(formData: FormData) {
     images: formData.getAll("images"),
   };
 
+  const normalizedAdvantages = String(raw.advantages || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join("\n");
+  const normalizedAdvantagesBg = String(raw.advantagesBg || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join("\n");
+
   const parsed = productSchema.safeParse({
     ...raw,
+    nameBg: raw.nameBg || undefined,
+    shortDescriptionBg: raw.shortDescriptionBg || undefined,
+    descriptionBg: raw.descriptionBg || undefined,
     application: raw.application || undefined,
+    applicationBg: raw.applicationBg || undefined,
     certification: raw.certification || undefined,
+    certificationBg: raw.certificationBg || undefined,
     baseOil: raw.baseOil || undefined,
-    advantages: String(raw.advantages || "")
-      .split("\n")
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .join("\n"),
+    advantages: normalizedAdvantages,
+    advantagesBg: normalizedAdvantagesBg || undefined,
     images: raw.images.map((img) => String(img)),
   });
 
@@ -81,6 +106,12 @@ function parseProductForm(formData: FormData) {
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
+    advantagesBg: parsed.data.advantagesBg
+      ? parsed.data.advantagesBg
+          .split("\n")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : undefined,
   };
 }
 

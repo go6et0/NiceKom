@@ -182,6 +182,8 @@ const dictionary = {
       inStock: "in stock",
       productForm: {
         productName: "Product name",
+        languageEnSuffix: " (EN)",
+        languageBgSuffix: " (BG)",
         brand: "Brand",
         shortDescription: "Short description",
         fullDescription: "Full description",
@@ -412,6 +414,8 @@ const dictionary = {
       inStock: "налични",
       productForm: {
         productName: "Име на продукта",
+        languageEnSuffix: " (EN)",
+        languageBgSuffix: " (BG)",
         brand: "Марка",
         shortDescription: "Кратко описание",
         fullDescription: "Пълно описание",

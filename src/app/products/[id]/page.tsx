@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/format";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
+import { getProductText } from "@/lib/product-text";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,6 +27,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
 
   if (!product) notFound();
+  const text = getProductText(product, locale);
 
   const unitLabel =
     product.unit === "LITERS"
@@ -42,7 +44,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-12 lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-      <ProductGallery images={product.images} name={product.name} />
+      <ProductGallery images={product.images} name={text.name} />
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <Badge variant="secondary">{t.product.type[product.type]}</Badge>
@@ -50,11 +52,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {t.product.viscosityLabel}: {product.viscosity}
           </span>
         </div>
-        <h1 className="text-3xl font-semibold">{product.name}</h1>
+        <h1 className="text-3xl font-semibold">{text.name}</h1>
         <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
           {product.brand}
         </p>
-        <p className="text-lg text-muted-foreground">{product.description}</p>
+        <p className="text-lg text-muted-foreground">{text.description}</p>
         <div className="grid gap-3 rounded-2xl border border-border/60 bg-card/80 p-5 text-sm shadow-sm">
           <div className="flex items-center justify-between">
             <span>{t.product.packageSize}</span>
@@ -62,16 +64,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {Number(product.packageSize)} {unitLabel}
             </span>
           </div>
-          {product.application && (
+          {text.application && (
             <div className="flex items-center justify-between">
               <span>{t.product.application}</span>
-              <span className="font-medium">{product.application}</span>
+              <span className="font-medium">{text.application}</span>
             </div>
           )}
-          {product.certification && (
+          {text.certification && (
             <div className="flex items-center justify-between">
               <span>{t.product.certification}</span>
-              <span className="font-medium">{product.certification}</span>
+              <span className="font-medium">{text.certification}</span>
             </div>
           )}
           {baseOilLabel && (
@@ -112,14 +114,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {t.product.advantages}
           </p>
           <ul className="list-inside list-disc text-sm text-muted-foreground">
-            {product.advantages.map((advantage) => (
+            {text.advantages.map((advantage) => (
               <li key={advantage}>{advantage}</li>
             ))}
           </ul>
         </div>
         <AddToCartButton
           productId={product.id}
-          name={product.name}
+          name={text.name}
           price={Number(product.price)}
           image={product.images[0]}
           maxQuantity={product.quantity}

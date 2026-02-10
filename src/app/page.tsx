@@ -6,6 +6,7 @@ import ProductFilters from "@/components/products/product-filters";
 import { Button } from "@/components/ui/button";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
+import { getProductText } from "@/lib/product-text";
 
 type HomeProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>> | Record<
@@ -17,6 +18,7 @@ type HomeProps = {
 export default async function Home({ searchParams }: HomeProps) {
   const locale = await getLocale();
   const t = getDictionary(locale);
+  const isBg = locale === "bg";
   const resolvedSearchParams = await Promise.resolve(searchParams);
   const getParam = (key: string) => {
     const value = resolvedSearchParams[key];
@@ -51,12 +53,25 @@ export default async function Home({ searchParams }: HomeProps) {
   const hasMinTemp = minTemp !== undefined;
   const hasMaxTemp = maxTemp !== undefined;
 
+  const applicationFilter =
+    application && isBg
+      ? { applicationBg: application }
+      : application
+      ? { application }
+      : {};
+  const certificationFilter =
+    certification && isBg
+      ? { certificationBg: certification }
+      : certification
+      ? { certification }
+      : {};
+
   const where = {
     ...(brand ? { brand } : {}),
     ...(type ? { type: type as "OIL" | "GREASE" } : {}),
     ...(viscosity ? { viscosity } : {}),
-    ...(application ? { application } : {}),
-    ...(certification ? { certification } : {}),
+    ...applicationFilter,
+    ...certificationFilter,
     ...(baseOil ? { baseOil: baseOil as "MINERAL" | "SEMI_SYNTHETIC" | "SYNTHETIC" } : {}),
     ...(unit ? { unit: unit as "LITERS" | "KILOGRAMS" } : {}),
     ...(availability === "in" ? { quantity: { gt: 0 } } : {}),
@@ -94,20 +109,43 @@ export default async function Home({ searchParams }: HomeProps) {
       case "price-desc":
         return { price: "desc" };
       case "name-asc":
-        return { name: "asc" };
+        return isBg ? { nameBg: "asc" } : { name: "asc" };
       case "name-desc":
-        return { name: "desc" };
+        return isBg ? { nameBg: "desc" } : { name: "desc" };
       default:
         return { createdAt: "desc" };
     }
   })();
 
+  const applicationPromise = isBg
+    ? prisma.product.findMany({
+        distinct: ["applicationBg"],
+        select: { applicationBg: true },
+        orderBy: { applicationBg: "asc" },
+      })
+    : prisma.product.findMany({
+        distinct: ["application"],
+        select: { application: true },
+        orderBy: { application: "asc" },
+      });
+  const certificationPromise = isBg
+    ? prisma.product.findMany({
+        distinct: ["certificationBg"],
+        select: { certificationBg: true },
+        orderBy: { certificationBg: "asc" },
+      })
+    : prisma.product.findMany({
+        distinct: ["certification"],
+        select: { certification: true },
+        orderBy: { certification: "asc" },
+      });
+
   const [
     products,
     brands,
     viscosities,
-    applications,
-    certifications,
+    applicationItems,
+    certificationItems,
     baseOils,
     units,
   ] = await Promise.all([
@@ -125,16 +163,8 @@ export default async function Home({ searchParams }: HomeProps) {
       select: { viscosity: true },
       orderBy: { viscosity: "asc" },
     }),
-    prisma.product.findMany({
-      distinct: ["application"],
-      select: { application: true },
-      orderBy: { application: "asc" },
-    }),
-    prisma.product.findMany({
-      distinct: ["certification"],
-      select: { certification: true },
-      orderBy: { certification: "asc" },
-    }),
+    applicationPromise,
+    certificationPromise,
     prisma.product.findMany({
       distinct: ["baseOil"],
       select: { baseOil: true },
@@ -147,16 +177,27 @@ export default async function Home({ searchParams }: HomeProps) {
     }),
   ]);
 
+  const applications = isBg
+    ? (applicationItems as Array<{ applicationBg: string | null }>)
+        .map((item) => item.applicationBg)
+        .filter((item): item is string => Boolean(item))
+    : (applicationItems as Array<{ application: string | null }>)
+        .map((item) => item.application)
+        .filter((item): item is string => Boolean(item));
+  const certifications = isBg
+    ? (certificationItems as Array<{ certificationBg: string | null }>)
+        .map((item) => item.certificationBg)
+        .filter((item): item is string => Boolean(item))
+    : (certificationItems as Array<{ certification: string | null }>)
+        .map((item) => item.certification)
+        .filter((item): item is string => Boolean(item));
+
   const filterOptions = {
     brands: brands.map((item) => item.brand),
     types: ["OIL", "GREASE"],
     viscosities: viscosities.map((item) => item.viscosity),
-    applications: applications
-      .map((item) => item.application)
-      .filter((item): item is string => Boolean(item)),
-    certifications: certifications
-      .map((item) => item.certification)
-      .filter((item): item is string => Boolean(item)),
+    applications,
+    certifications,
     baseOils: baseOils
       .map((item) => item.baseOil)
       .filter((item): item is BaseOil => item !== null)
@@ -244,21 +285,24 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                brand={product.brand}
-                price={Number(product.price)}
-                shortDescription={product.shortDescription}
-                image={product.images[0]}
-                type={product.type}
-                quantity={product.quantity}
-                unit={product.unit}
-                packageSize={Number(product.packageSize)}
-              />
-            ))}
+            {products.map((product) => {
+              const text = getProductText(product, locale);
+              return (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={text.name}
+                  brand={product.brand}
+                  price={Number(product.price)}
+                  shortDescription={text.shortDescription}
+                  image={product.images[0]}
+                  type={product.type}
+                  quantity={product.quantity}
+                  unit={product.unit}
+                  packageSize={Number(product.packageSize)}
+                />
+              );
+            })}
           </div>
         )}
       </section>
