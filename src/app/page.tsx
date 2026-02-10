@@ -59,12 +59,7 @@ export default async function Home({ searchParams }: HomeProps) {
       : application
       ? { application }
       : {};
-  const certificationFilter =
-    certification && isBg
-      ? { certificationBg: certification }
-      : certification
-      ? { certification }
-      : {};
+  const certificationFilter = certification ? { certification } : {};
 
   const where = {
     ...(brand ? { brand } : {}),
@@ -128,17 +123,11 @@ export default async function Home({ searchParams }: HomeProps) {
         select: { application: true },
         orderBy: { application: "asc" },
       });
-  const certificationPromise = isBg
-    ? prisma.product.findMany({
-        distinct: ["certificationBg"],
-        select: { certificationBg: true },
-        orderBy: { certificationBg: "asc" },
-      })
-    : prisma.product.findMany({
-        distinct: ["certification"],
-        select: { certification: true },
-        orderBy: { certification: "asc" },
-      });
+  const certificationPromise = prisma.product.findMany({
+    distinct: ["certification"],
+    select: { certification: true },
+    orderBy: { certification: "asc" },
+  });
 
   const [
     products,
@@ -184,13 +173,11 @@ export default async function Home({ searchParams }: HomeProps) {
     : (applicationItems as Array<{ application: string | null }>)
         .map((item) => item.application)
         .filter((item): item is string => Boolean(item));
-  const certifications = isBg
-    ? (certificationItems as Array<{ certificationBg: string | null }>)
-        .map((item) => item.certificationBg)
-        .filter((item): item is string => Boolean(item))
-    : (certificationItems as Array<{ certification: string | null }>)
-        .map((item) => item.certification)
-        .filter((item): item is string => Boolean(item));
+  const certifications = (certificationItems as Array<{
+    certification: string | null;
+  }>)
+    .map((item) => item.certification)
+    .filter((item): item is string => Boolean(item));
 
   const filterOptions = {
     brands: brands.map((item) => item.brand),

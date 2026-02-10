@@ -32,6 +32,6 @@ export function getProductText(
     advantages:
       product.advantagesBg.length > 0 ? product.advantagesBg : product.advantages,
     application: product.applicationBg || product.application,
-    certification: product.certificationBg || product.certification,
+    certification: product.certification,
   };
 }

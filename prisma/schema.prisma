@@ -67,7 +67,6 @@ model Product {
   application      String?
   applicationBg    String?
   certification    String?
-  certificationBg  String?
   baseOil          BaseOil?
   operatingTempMin Int?
   operatingTempMax Int?

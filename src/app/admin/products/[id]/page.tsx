@@ -43,7 +43,6 @@ export default async function EditProductPage({
           application: product.application,
           applicationBg: product.applicationBg ?? undefined,
           certification: product.certification,
-          certificationBg: product.certificationBg ?? undefined,
           baseOil: product.baseOil,
           operatingTempMin: product.operatingTempMin,
           operatingTempMax: product.operatingTempMax,

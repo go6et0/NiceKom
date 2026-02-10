@@ -31,7 +31,6 @@ type ProductFormValues = {
   application?: string | null;
   applicationBg?: string | null;
   certification?: string | null;
-  certificationBg?: string | null;
   baseOil?: "MINERAL" | "SEMI_SYNTHETIC" | "SYNTHETIC" | null;
   operatingTempMin?: number | null;
   operatingTempMax?: number | null;
@@ -303,31 +302,17 @@ export default function ProductForm({
           />
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="grid gap-2">
-          <Label htmlFor="applicationBg">
-            {formLabels.application}
-            {labelSuffixBg}
-          </Label>
-          <Input
-            id="applicationBg"
-            name="applicationBg"
-            defaultValue={defaultValues?.applicationBg ?? ""}
-            placeholder={formLabels.applicationPlaceholder}
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="certificationBg">
-            {formLabels.certification}
-            {labelSuffixBg}
-          </Label>
-          <Input
-            id="certificationBg"
-            name="certificationBg"
-            defaultValue={defaultValues?.certificationBg ?? ""}
-            placeholder={formLabels.certificationPlaceholder}
-          />
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="applicationBg">
+          {formLabels.application}
+          {labelSuffixBg}
+        </Label>
+        <Input
+          id="applicationBg"
+          name="applicationBg"
+          defaultValue={defaultValues?.applicationBg ?? ""}
+          placeholder={formLabels.applicationPlaceholder}
+        />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="grid gap-2">
