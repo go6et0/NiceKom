@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -30,9 +31,15 @@ export function LocaleProvider({
   initialLocale?: Locale;
   children: React.ReactNode;
 }) {
-  const [locale, setLocale] = useState<Locale>(
+  const [locale, setLocaleState] = useState<Locale>(
     initialLocale ?? defaultLocale
   );
+
+  const setLocale = useCallback((nextLocale: Locale) => {
+    setLocaleState(nextLocale);
+    document.cookie = `${COOKIE_NAME}=${nextLocale}; path=/; max-age=31536000`;
+    document.documentElement.lang = nextLocale;
+  }, []);
 
   useEffect(() => {
     document.cookie = `${COOKIE_NAME}=${locale}; path=/; max-age=31536000`;
@@ -45,7 +52,7 @@ export function LocaleProvider({
       setLocale,
       t: getDictionary(locale),
     }),
-    [locale]
+    [locale, setLocale]
   );
 
   return (
