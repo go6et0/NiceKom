@@ -30,9 +30,7 @@ export function getProductText(
     shortDescription: product.shortDescriptionBg || product.shortDescription,
     description: product.descriptionBg || product.description,
     advantages:
-      product.advantagesBg && product.advantagesBg.length > 0
-        ? product.advantagesBg
-        : product.advantages,
+      product.advantagesBg.length > 0 ? product.advantagesBg : product.advantages,
     application: product.applicationBg || product.application,
     certification: product.certificationBg || product.certification,
   };

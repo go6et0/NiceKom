@@ -108,7 +108,7 @@ function parseProductForm(formData: FormData) {
           .split("\n")
           .map((item) => item.trim())
           .filter(Boolean)
-      : undefined,
+      : [],
   };
 }
 

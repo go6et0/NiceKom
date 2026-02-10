@@ -59,7 +59,7 @@ model Product {
   description      String
   descriptionBg    String?
   advantages       String[]
-  advantagesBg     String[]?
+  advantagesBg     String[]    @default([])
   type             ProductType
   viscosity        String
   unit             Unit
