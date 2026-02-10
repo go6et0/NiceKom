@@ -109,9 +109,9 @@ export default async function Home({ searchParams }: HomeProps) {
       case "price-desc":
         return { price: "desc" };
       case "name-asc":
-        return isBg ? { nameBg: "asc" } : { name: "asc" };
+        return { name: "asc" };
       case "name-desc":
-        return isBg ? { nameBg: "desc" } : { name: "desc" };
+        return { name: "desc" };
       default:
         return { createdAt: "desc" };
     }

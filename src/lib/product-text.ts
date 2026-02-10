@@ -26,7 +26,7 @@ export function getProductText(
   }
 
   return {
-    name: product.nameBg || product.name,
+    name: product.name,
     shortDescription: product.shortDescriptionBg || product.shortDescription,
     description: product.descriptionBg || product.description,
     advantages:

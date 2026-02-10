@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 
 const productSchema = z.object({
   name: z.string().min(2),
-  nameBg: z.string().min(2).optional(),
   brand: z.string().min(2),
   shortDescription: z.string().min(10),
   shortDescriptionBg: z.string().min(10).optional(),
@@ -43,7 +42,6 @@ function normalizeNumber(value: FormDataEntryValue | null) {
 function parseProductForm(formData: FormData) {
   const raw = {
     name: normalizeText(formData.get("name")),
-    nameBg: normalizeText(formData.get("nameBg")),
     brand: normalizeText(formData.get("brand")),
     shortDescription: normalizeText(formData.get("shortDescription")),
     shortDescriptionBg: normalizeText(formData.get("shortDescriptionBg")),
@@ -80,7 +78,6 @@ function parseProductForm(formData: FormData) {
 
   const parsed = productSchema.safeParse({
     ...raw,
-    nameBg: raw.nameBg || undefined,
     shortDescriptionBg: raw.shortDescriptionBg || undefined,
     descriptionBg: raw.descriptionBg || undefined,
     application: raw.application || undefined,

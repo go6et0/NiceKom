@@ -17,7 +17,6 @@ import { useLocale } from "@/components/site/locale-provider";
 
 type ProductFormValues = {
   name: string;
-  nameBg?: string;
   brand: string;
   shortDescription: string;
   shortDescriptionBg?: string;
@@ -182,17 +181,6 @@ export default function ProductForm({
           rows={4}
           defaultValue={advantagesText}
           required
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="nameBg">
-          {formLabels.productName}
-          {labelSuffixBg}
-        </Label>
-        <Input
-          id="nameBg"
-          name="nameBg"
-          defaultValue={defaultValues?.nameBg}
         />
       </div>
       <div className="grid gap-2">

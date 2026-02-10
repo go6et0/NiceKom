@@ -29,7 +29,6 @@ export default async function EditProductPage({
       <ProductForm
         defaultValues={{
           name: product.name,
-          nameBg: product.nameBg ?? undefined,
           brand: product.brand,
           shortDescription: product.shortDescription,
           shortDescriptionBg: product.shortDescriptionBg ?? undefined,
