@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 
 export type ProductFormState = {
   status: "idle" | "success" | "error";
@@ -119,6 +120,7 @@ export async function createProduct(
   formData: FormData
 ): Promise<ProductFormState> {
   try {
+    await requireAdmin();
     const data = parseProductForm(formData);
 
     await prisma.product.create({
@@ -143,6 +145,7 @@ export async function updateProduct(
   formData: FormData
 ): Promise<ProductFormState> {
   try {
+    await requireAdmin();
     const data = parseProductForm(formData);
 
     await prisma.product.update({
@@ -164,7 +167,9 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productId: string) {
+  await requireAdmin();
   await prisma.product.delete({ where: { id: productId } });
   revalidatePath("/");
   revalidatePath("/admin/products");
+  revalidatePath(`/admin/products/${productId}`);
 }

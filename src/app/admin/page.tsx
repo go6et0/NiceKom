@@ -42,15 +42,15 @@ export default async function AdminPage() {
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0"
+                className="flex flex-col gap-3 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <p className="font-semibold">{order.customerName}</p>
                   <p className="text-muted-foreground">
-                    {order.items.length} {t.admin.items} •{" "}
+                    {order.items.length} {t.admin.items} |{" "}
                     {t.order.status[order.status as keyof typeof t.order.status] ??
                       order.status}{" "}
-                    • {new Date(order.createdAt).toLocaleDateString(dateLocale)}
+                    | {new Date(order.createdAt).toLocaleDateString(dateLocale)}
                   </p>
                 </div>
                 <p className="text-base font-semibold">

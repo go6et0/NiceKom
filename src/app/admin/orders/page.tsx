@@ -27,11 +27,11 @@ export default async function OrdersPage() {
         <div className="mt-4 space-y-6">
           {orders.map((order) => (
             <div key={order.id} className="border-b border-border/50 pb-4">
-              <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+              <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">{order.customerName}</p>
                   <p className="text-muted-foreground">
-                    {order.customerEmail} • {order.customerPhone}
+                    {order.customerEmail} | {order.customerPhone}
                   </p>
                   <p className="text-muted-foreground">
                     {order.customerAddress}
@@ -44,15 +44,18 @@ export default async function OrdersPage() {
                   {formatCurrency(Number(order.total))}
                 </p>
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+              <div className="mt-3 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-center">
                 <span className="font-semibold">
                   {t.admin.status}: {statusLabel(order.status)}
                 </span>
-                <form action={updateOrderStatus.bind(null, order.id)}>
+                <form
+                  action={updateOrderStatus.bind(null, order.id)}
+                  className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
+                >
                   <select
                     name="status"
                     defaultValue={order.status}
-                    className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm"
+                    className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm sm:min-w-40"
                   >
                     <option value="PENDING">{t.order.status.PENDING}</option>
                     <option value="ACCEPTED">{t.order.status.ACCEPTED}</option>
@@ -60,7 +63,7 @@ export default async function OrdersPage() {
                   </select>
                   <button
                     type="submit"
-                    className="ml-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"
+                    className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:ml-2"
                   >
                     {t.admin.save}
                   </button>
@@ -70,7 +73,7 @@ export default async function OrdersPage() {
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 {order.items.map((item) => (
                   <li key={item.id}>
-                    {item.name} • {item.quantity} ×{" "}
+                    {item.name} | {item.quantity} x{" "}
                     {formatCurrency(Number(item.price))}
                   </li>
                 ))}

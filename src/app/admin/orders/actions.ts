@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendOrderStatusEmail } from "@/lib/mailer";
+import { requireAdmin } from "@/lib/auth";
 
 const statusSchema = z.enum(["PENDING", "ACCEPTED", "COMPLETED"]);
 
 export async function updateOrderStatus(orderId: string, formData: FormData) {
+  await requireAdmin();
+
   const status = statusSchema.safeParse(formData.get("status"));
   if (!status.success) {
     throw new Error("Invalid status.");
@@ -40,8 +43,12 @@ export async function updateOrderStatus(orderId: string, formData: FormData) {
 }
 
 export async function deleteOrder(orderId: string) {
-  await prisma.orderItem.deleteMany({ where: { orderId } });
-  await prisma.order.delete({ where: { id: orderId } });
+  await requireAdmin();
+
+  await prisma.$transaction(async (tx) => {
+    await tx.orderItem.deleteMany({ where: { orderId } });
+    await tx.order.delete({ where: { id: orderId } });
+  });
 
   revalidatePath("/admin/orders");
   revalidatePath("/admin");

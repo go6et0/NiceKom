@@ -23,6 +23,7 @@ export async function verifyEmailWithToken(token: string) {
     where: { id: user.id },
     data: {
       emailVerified: new Date(),
+      emailVerifyToken: null,
       emailVerifyTokenExpires: null,
     },
   });

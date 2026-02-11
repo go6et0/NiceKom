@@ -30,22 +30,25 @@ export default async function ProductsPage() {
             const text = getProductText(product, locale);
             return (
               <div
-              key={product.id}
-              className="flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0"
-            >
+                key={product.id}
+                className="flex flex-col gap-3 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+              >
               <div>
                 <p className="font-semibold">{text.name}</p>
                 <p className="text-muted-foreground">
-                  {product.brand} • {t.product.type[product.type]} •{" "}
+                  {product.brand} | {t.product.type[product.type]} |{" "}
                   {product.quantity} {t.admin.inStock}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button asChild variant="outline">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:gap-3">
+                <Button asChild variant="outline" className="w-full sm:w-auto">
                   <Link href={`/admin/products/${product.id}`}>{t.admin.edit}</Link>
                 </Button>
-                <form action={deleteProduct.bind(null, product.id)}>
-                  <Button variant="destructive" type="submit">
+                <form
+                  action={deleteProduct.bind(null, product.id)}
+                  className="w-full sm:w-auto"
+                >
+                  <Button variant="destructive" type="submit" className="w-full sm:w-auto">
                     {t.admin.delete}
                   </Button>
                 </form>

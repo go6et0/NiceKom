@@ -1,10 +1,7 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect */
-
-import { useState } from "react";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/components/cart/cart-context";
 import { Button } from "@/components/ui/button";
@@ -23,6 +20,7 @@ export default function CartPage() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
   useEffect(() => {
     if (session?.user?.email && !customerEmail) {
@@ -33,6 +31,15 @@ export default function CartPage() {
   const handleCheckout = async () => {
     setLoading(true);
     setMessage(null);
+    setMessageType(null);
+
+    if (items.length === 0) {
+      setMessage(t.cart.missingItems);
+      setMessageType("error");
+      setLoading(false);
+      return;
+    }
+
     if (
       !customerName.trim() ||
       !customerEmail.trim() ||
@@ -40,35 +47,68 @@ export default function CartPage() {
       !customerAddress.trim()
     ) {
       setMessage(t.cart.missingDetails);
+      setMessageType("error");
       setLoading(false);
       return;
     }
-    const response = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        customerName,
-        customerEmail,
-        customerPhone,
-        customerAddress,
-        items: items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-      }),
-    });
 
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data.error || t.cart.orderError);
-    } else {
-      setMessage(t.cart.orderSuccess);
-      clear();
-      setCustomerName("");
-      setCustomerPhone("");
-      setCustomerAddress("");
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName,
+          customerEmail,
+          customerPhone,
+          customerAddress,
+          items: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
+        }),
+        signal: controller.signal,
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorCode = data.error as string | undefined;
+        if (errorCode === "INVALID_REQUEST") {
+          setMessage(t.cart.orderInvalid);
+        } else if (errorCode === "UNAUTHORIZED") {
+          setMessage(t.cart.orderUnauthorized);
+        } else if (errorCode === "PRODUCT_NOT_FOUND") {
+          setMessage(t.cart.productNotFound);
+        } else if (errorCode === "INSUFFICIENT_STOCK") {
+          const productName = typeof data.productName === "string" ? data.productName : null;
+          setMessage(
+            productName ? `${t.cart.stockError} (${productName})` : t.cart.stockError
+          );
+        } else {
+          setMessage(t.cart.orderError);
+        }
+        setMessageType("error");
+      } else {
+        setMessage(t.cart.orderSuccess);
+        setMessageType("success");
+        clear();
+        setCustomerName("");
+        setCustomerPhone("");
+        setCustomerAddress("");
+      }
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        setMessage(t.cart.orderTimeout);
+      } else {
+        setMessage(t.cart.orderNetworkError);
+      }
+      setMessageType("error");
+    } finally {
+      window.clearTimeout(timeoutId);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -178,12 +218,20 @@ export default function CartPage() {
               )}
               <Button
                 onClick={handleCheckout}
-                disabled={loading || !session?.user}
+                disabled={loading || !session?.user || items.length === 0}
               >
                 {loading ? t.cart.placingOrder : t.cart.placeOrder}
               </Button>
               {message && (
-                <p className="text-sm text-muted-foreground">{message}</p>
+                <p
+                  className={`rounded-xl border px-3 py-2 text-sm ${
+                    messageType === "success"
+                      ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+                      : "border-destructive/40 bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  {message}
+                </p>
               )}
             </div>
           </div>

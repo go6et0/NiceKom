@@ -50,15 +50,16 @@ export default function ProductFilters({ options }: { options: FilterOptions }) 
       onSubmit={handleSubmit}
       className="grid gap-4 rounded-2xl border border-border/60 bg-card/80 p-6 text-sm shadow-sm"
     >
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
           type="button"
           variant="outline"
+          className="w-full sm:w-auto"
           onClick={() => setIsOpen((prev) => !prev)}
         >
           {isOpen ? t.filters.toggleHide : t.filters.toggleShow}
         </Button>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Label
             htmlFor="sort"
             className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
@@ -69,7 +70,7 @@ export default function ProductFilters({ options }: { options: FilterOptions }) 
             id="sort"
             name="sort"
             defaultValue={params.get("sort") ?? "newest"}
-            className="h-10 rounded-md border border-border/60 bg-background px-3"
+            className="h-10 w-full rounded-md border border-border/60 bg-background px-3 sm:w-auto"
           >
             <option value="newest">{t.filters.sortNewest}</option>
             <option value="price-asc">{t.filters.sortPriceAsc}</option>
@@ -78,10 +79,13 @@ export default function ProductFilters({ options }: { options: FilterOptions }) 
             <option value="name-desc">{t.filters.sortNameDesc}</option>
           </select>
         </div>
-        <Button type="submit">{t.filters.apply}</Button>
+        <Button type="submit" className="w-full sm:w-auto">
+          {t.filters.apply}
+        </Button>
         <Button
           type="button"
           variant="ghost"
+          className="w-full sm:w-auto"
           onClick={() => router.push("/")}
         >
           {t.filters.clear}
