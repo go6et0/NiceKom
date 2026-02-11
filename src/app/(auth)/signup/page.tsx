@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/components/site/locale-provider";
@@ -11,7 +12,10 @@ export default function SignupPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { t } = useLocale();
+  const passwordPattern = /^(?=.*[A-Z]).{8,}$/;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,6 +24,12 @@ export default function SignupPage() {
     const confirmPassword = formData.get("confirmPassword")?.toString() ?? "";
     setLoading(true);
     setMessage(null);
+
+    if (!passwordPattern.test(password)) {
+      setMessage({ type: "error", text: t.auth.passwordRequirements });
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setMessage({ type: "error", text: t.auth.passwordMismatch });
@@ -65,6 +75,10 @@ export default function SignupPage() {
           ? t.auth.signupEmailError
           : errorCode === "EMAIL_EXISTS"
           ? t.auth.signupExists
+          : errorCode === "PASSWORD_POLICY"
+          ? t.auth.passwordRequirements
+          : errorCode === "PASSWORD_MISMATCH"
+          ? t.auth.passwordMismatch
           : data.error || t.auth.signupError;
       setMessage({ type: "error", text: errorText });
     } else {
@@ -93,18 +107,45 @@ export default function SignupPage() {
           placeholder={t.auth.emailPlaceholder}
           required
         />
-        <Input
-          name="password"
-          type="password"
-          placeholder={t.auth.passwordPlaceholder}
-          required
-        />
-        <Input
-          name="confirmPassword"
-          type="password"
-          placeholder={t.auth.confirmPasswordPlaceholder}
-          required
-        />
+        <div className="relative">
+          <Input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder={t.auth.passwordPlaceholder}
+            className="pr-11"
+            minLength={8}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            title={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        <div className="relative">
+          <Input
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder={t.auth.confirmPasswordPlaceholder}
+            className="pr-11"
+            minLength={8}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            title={showConfirmPassword ? "Hide password" : "Show password"}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">{t.auth.passwordRequirements}</p>
         {message ? (
           <div
             className={`rounded-2xl border px-4 py-3 text-sm font-medium ${

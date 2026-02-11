@@ -48,6 +48,9 @@ export default async function Navbar() {
             )}
             {isAuthed && (
               <>
+                <Button asChild variant="ghost">
+                  <Link href="/orders">{t.nav.myOrders}</Link>
+                </Button>
                 <CartCount />
                 <LogoutButton />
               </>

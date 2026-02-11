@@ -84,6 +84,11 @@ export default function MobileMenu({ isAuthed, isAdmin }: MobileMenuProps) {
             <div className="grid gap-2">
               <DialogClose asChild>
                 <Button asChild variant="outline" className="w-full">
+                  <Link href="/orders">{t.nav.myOrders}</Link>
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button asChild variant="outline" className="w-full">
                   <Link href="/cart" className="flex items-center justify-center gap-2">
                     <span>{t.nav.cart}</span>
                     <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">

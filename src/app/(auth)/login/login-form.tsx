@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/components/site/locale-provider";
@@ -12,6 +13,7 @@ export default function LoginForm() {
   const error = params.get("error");
   const { t } = useLocale();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,12 +45,24 @@ export default function LoginForm() {
           placeholder={t.auth.emailPlaceholder}
           required
         />
-        <Input
-          name="password"
-          type="password"
-          placeholder={t.auth.passwordPlaceholder}
-          required
-        />
+        <div className="relative">
+          <Input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder={t.auth.passwordPlaceholder}
+            className="pr-11"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground transition hover:text-foreground"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            title={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {error && (
           <p className="text-sm text-destructive">
             {t.auth.invalidCredentials}
