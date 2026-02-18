@@ -1,10 +1,10 @@
 ﻿"use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/products/add-to-cart-button";
-import ProductImage from "@/components/products/product-image";
 import { formatCurrency } from "@/lib/format";
 import { useLocale } from "@/components/site/locale-provider";
 
@@ -44,7 +44,7 @@ export default function ProductCard({
         href={`/products/${id}`}
         className="relative aspect-[4/3] w-full bg-card/70"
       >
-        <ProductImage
+        <Image
           src={image || "/placeholder.svg"}
           alt={name}
           fill

@@ -1,7 +1,7 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
-import ProductImage from "@/components/products/product-image";
 
 type ProductGalleryProps = {
   images: string[];
@@ -15,7 +15,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm">
-        <ProductImage
+        <Image
           src={active}
           alt={name}
           fill
@@ -35,7 +35,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
               active === src ? "border-primary" : "border-border/60"
             }`}
           >
-            <ProductImage
+            <Image
               src={src}
               alt={name}
               fill

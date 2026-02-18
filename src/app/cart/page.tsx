@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useCart } from "@/components/cart/cart-context";
@@ -9,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/format";
 import { useLocale } from "@/components/site/locale-provider";
 import { useToast } from "@/components/ui/toast-provider";
-import ProductImage from "@/components/products/product-image";
 
 export default function CartPage() {
   const { items, subtotal, removeItem, updateQuantity, clear } = useCart();
@@ -177,7 +177,7 @@ export default function CartPage() {
               >
                 <div className="flex items-center gap-4">
                   <div className="relative h-20 w-24 overflow-hidden rounded-xl border border-border/60 bg-background/70">
-                    <ProductImage
+                    <Image
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
                       fill
