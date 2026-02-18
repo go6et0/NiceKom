@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/components/cart/cart-context";
 import { useLocale } from "@/components/site/locale-provider";
+import { useToast } from "@/components/ui/toast-provider";
 
 type AddToCartButtonProps = {
   productId: string;
@@ -22,6 +23,7 @@ export default function AddToCartButton({
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
   const { t } = useLocale();
+  const { showToast } = useToast();
   const [added, setAdded] = useState(false);
   const outOfStock = maxQuantity <= 0;
 
@@ -37,6 +39,7 @@ export default function AddToCartButton({
           maxQuantity,
         });
         setAdded(true);
+        showToast(t.product.added, "success");
         setTimeout(() => setAdded(false), 1200);
       }}
       disabled={outOfStock}

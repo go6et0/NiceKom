@@ -1,120 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/components/site/locale-provider";
-import { useToast } from "@/components/ui/toast-provider";
 
-export default function SignupPage() {
+export default function ResetPasswordPage() {
+  const { t } = useLocale();
+  const params = useSearchParams();
+  const token = useMemo(() => params.get("token") ?? "", [params]);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { t } = useLocale();
-  const { showToast } = useToast();
-  const passwordPattern = /^(?=.*[A-Z]).{8,}$/;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setMessage(null);
+    if (!token) {
+      setMessage({ type: "error", text: t.auth.resetInvalidToken });
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const password = formData.get("password")?.toString() ?? "";
     const confirmPassword = formData.get("confirmPassword")?.toString() ?? "";
+
     setLoading(true);
-    setMessage(null);
-
-    if (!passwordPattern.test(password)) {
-      setMessage({ type: "error", text: t.auth.passwordRequirements });
-      showToast(t.auth.passwordRequirements, "error");
-      setLoading(false);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setMessage({ type: "error", text: t.auth.passwordMismatch });
-      showToast(t.auth.passwordMismatch, "error");
-      setLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      controller.abort();
-    }, 12000);
-
-    let response: Response;
     try {
-      response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.get("name")?.toString(),
-          email: formData.get("email")?.toString(),
+          token,
           password,
           confirmPassword,
         }),
-        signal: controller.signal,
       });
-    } catch (error) {
-      if ((error as Error).name === "AbortError") {
-        setMessage({ type: "error", text: t.auth.requestTimeout });
-        showToast(t.auth.requestTimeout, "error");
-      } else {
-        setMessage({ type: "error", text: t.auth.signupError });
-        showToast(t.auth.signupError, "error");
-      }
-      setLoading(false);
-      window.clearTimeout(timeoutId);
-      return;
-    }
-    window.clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const data = await response.json();
-      const errorCode = data.error as string | undefined;
-      const errorText =
-        errorCode === "EMAIL_SEND_FAILED"
-          ? t.auth.signupEmailError
-          : errorCode === "EMAIL_EXISTS"
-          ? t.auth.signupExists
-          : errorCode === "PASSWORD_POLICY"
-          ? t.auth.passwordRequirements
-          : errorCode === "PASSWORD_MISMATCH"
-          ? t.auth.passwordMismatch
-          : data.error || t.auth.signupError;
-      setMessage({ type: "error", text: errorText });
-      showToast(errorText, "error");
-    } else {
-      setMessage({ type: "success", text: t.auth.signupSuccess });
-      showToast(t.auth.signupSuccess, "success");
-      (event.target as HTMLFormElement).reset();
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorCode = data.error as string | undefined;
+        const errorText =
+          errorCode === "PASSWORD_POLICY"
+            ? t.auth.passwordRequirements
+            : errorCode === "PASSWORD_MISMATCH"
+            ? t.auth.passwordMismatch
+            : errorCode === "INVALID_TOKEN"
+            ? t.auth.resetInvalidToken
+            : t.auth.resetError;
+        setMessage({ type: "error", text: errorText });
+      } else {
+        setMessage({ type: "success", text: t.auth.resetSuccess });
+        (event.target as HTMLFormElement).reset();
+      }
+    } catch {
+      setMessage({ type: "error", text: t.auth.resetError });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-6 py-12">
       <div>
-        <h1 className="text-3xl font-semibold">{t.auth.signupTitle}</h1>
-        <p className="text-muted-foreground">
-          {t.auth.signupSubtitle}
-        </p>
+        <h1 className="text-3xl font-semibold">{t.auth.resetTitle}</h1>
+        <p className="text-muted-foreground">{t.auth.resetSubtitle}</p>
       </div>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm"
       >
-        <Input name="name" placeholder={t.auth.namePlaceholder} />
-        <Input
-          name="email"
-          type="email"
-          placeholder={t.auth.emailPlaceholder}
-          required
-        />
         <div className="relative">
           <Input
             name="password"
@@ -165,8 +127,11 @@ export default function SignupPage() {
             {message.text}
           </div>
         ) : null}
-        <Button type="submit" disabled={loading}>
-          {loading ? t.auth.creating : t.auth.createAccount}
+        <Button type="submit" disabled={loading || !token}>
+          {loading ? t.auth.resetting : t.auth.resetButton}
+        </Button>
+        <Button asChild type="button" variant="ghost">
+          <Link href="/login">{t.verify.goToLogin}</Link>
         </Button>
       </form>
     </main>

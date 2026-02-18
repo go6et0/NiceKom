@@ -3,7 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
+export const passwordPolicy = /^(?=.*[A-Z]).{8,}$/;
+
 export function createEmailVerifyToken() {
+  return randomBytes(32).toString("hex");
+}
+
+export function createPasswordResetToken() {
   return randomBytes(32).toString("hex");
 }
 

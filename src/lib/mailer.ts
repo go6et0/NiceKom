@@ -43,6 +43,28 @@ export async function sendVerificationEmail(email: string, token: string) {
   });
 }
 
+export async function sendPasswordResetEmail(email: string, token: string) {
+  const transporter = createTransporter();
+
+  const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const resetUrl = `${appUrl}/reset-password?token=${token}`;
+
+  await transporter.sendMail({
+    from,
+    to: email,
+    subject: "Reset your password",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Reset your password</h2>
+        <p>We received a password reset request for your account.</p>
+        <p><a href="${resetUrl}" style="background:#0f172a;color:white;padding:10px 16px;border-radius:6px;text-decoration:none;display:inline-block;">Reset Password</a></p>
+        <p>If the button doesn't work, copy and paste this link:</p>
+        <p>${resetUrl}</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendOrderStatusEmail(
   email: string,
   name: string,

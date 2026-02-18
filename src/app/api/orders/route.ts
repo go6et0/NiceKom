@@ -109,6 +109,7 @@ export async function POST(request: Request) {
       );
     }
 
+    console.error("CreateOrderError", error);
     return NextResponse.json({ error: "ORDER_FAILED" }, { status: 500 });
   }
 }

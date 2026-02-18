@@ -1,0 +1,19 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0B1220"/>
+  <rect x="40" y="40" width="1120" height="550" rx="32" fill="url(#bg)"/>
+  <rect x="80" y="120" width="620" height="390" rx="24" fill="#0C172B" stroke="#1E2B42"/>
+  <rect x="740" y="120" width="380" height="390" rx="24" fill="#111F38" stroke="#2A3C5C"/>
+  <text x="120" y="220" fill="#AFC6E9" font-size="28" font-family="Arial, sans-serif" letter-spacing="4">NICEKOM OILS</text>
+  <text x="120" y="290" fill="#EAF2FF" font-size="62" font-family="Arial, sans-serif" font-weight="700">Industrial Oils &amp; Greases</text>
+  <text x="120" y="355" fill="#B7C7E2" font-size="30" font-family="Arial, sans-serif">Built for modern machinery and heavy-duty systems.</text>
+  <text x="780" y="220" fill="#AFC6E9" font-size="24" font-family="Arial, sans-serif" letter-spacing="3">SHOP HIGHLIGHTS</text>
+  <text x="780" y="280" fill="#EAF2FF" font-size="32" font-family="Arial, sans-serif" font-weight="700">High thermal stability</text>
+  <text x="780" y="330" fill="#EAF2FF" font-size="32" font-family="Arial, sans-serif" font-weight="700">Water resistance</text>
+  <text x="780" y="380" fill="#EAF2FF" font-size="32" font-family="Arial, sans-serif" font-weight="700">Fleet support</text>
+  <defs>
+    <linearGradient id="bg" x1="40" y1="40" x2="1160" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1730"/>
+      <stop offset="1" stop-color="#0A1120"/>
+    </linearGradient>
+  </defs>
+</svg>

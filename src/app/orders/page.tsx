@@ -1,24 +1,56 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { formatCurrency } from "@/lib/format";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
 
-export default async function OrdersPage() {
+type OrdersPageProps = {
+  searchParams:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>;
+};
+
+const PAGE_SIZE = 8;
+
+export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const session = await requireAuth();
   const locale = await getLocale();
   const t = getDictionary(locale);
   const dateLocale = locale === "bg" ? "bg-BG" : "en-US";
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const rawPage = resolvedSearchParams.page;
+  const pageValue = Array.isArray(rawPage) ? rawPage[0] : rawPage;
+  const page = Math.max(1, Number(pageValue || "1") || 1);
+  const skip = (page - 1) * PAGE_SIZE;
 
-  const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    include: { items: true },
-  });
+  const [orders, totalOrders, totals, latestOrder] = await Promise.all([
+    prisma.order.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: PAGE_SIZE,
+      include: { items: true },
+    }),
+    prisma.order.count({
+      where: { userId: session.user.id },
+    }),
+    prisma.order.aggregate({
+      where: { userId: session.user.id },
+      _sum: { total: true },
+    }),
+    prisma.order.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
+  ]);
 
-  const totalOrders = orders.length;
-  const totalSpent = orders.reduce((sum, order) => sum + Number(order.total), 0);
-  const latestOrderDate = orders[0]?.createdAt;
+  const totalPages = Math.max(1, Math.ceil(totalOrders / PAGE_SIZE));
+  const totalSpent = Number(totals._sum.total ?? 0);
+  const latestOrderDate = latestOrder?.createdAt;
+  const previousPage = page > 1 ? page - 1 : null;
+  const nextPage = page < totalPages ? page + 1 : null;
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12">
@@ -78,6 +110,14 @@ export default async function OrdersPage() {
                     {t.orders.total}: {formatCurrency(Number(order.total))}
                   </span>
                 </div>
+                <div className="mt-3">
+                  <Link
+                    href={`/orders/${order.id}`}
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t.orders.viewDetails}
+                  </Link>
+                </div>
                 <div className="mt-3 rounded-lg border border-border/60 bg-card/80 p-3 text-sm">
                   <p className="font-medium">{t.orders.customerDetails}</p>
                   <p className="mt-1 text-muted-foreground">
@@ -96,6 +136,33 @@ export default async function OrdersPage() {
             ))}
           </div>
         )}
+        {totalOrders > 0 ? (
+          <div className="mt-6 flex items-center justify-between gap-3">
+            {previousPage ? (
+              <Link
+                href={`/orders?page=${previousPage}`}
+                className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+              >
+                {t.orders.previousPage}
+              </Link>
+            ) : (
+              <span />
+            )}
+            <p className="text-sm text-muted-foreground">
+              {t.orders.pageLabel} {page} / {totalPages}
+            </p>
+            {nextPage ? (
+              <Link
+                href={`/orders?page=${nextPage}`}
+                className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+              >
+                {t.orders.nextPage}
+              </Link>
+            ) : (
+              <span />
+            )}
+          </div>
+        ) : null}
       </section>
     </main>
   );

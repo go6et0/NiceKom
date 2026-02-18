@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ export default function LoginForm() {
             type={showPassword ? "text" : "password"}
             placeholder={t.auth.passwordPlaceholder}
             className="pr-11"
+            minLength={8}
             required
           />
           <button
@@ -68,6 +70,12 @@ export default function LoginForm() {
             {t.auth.invalidCredentials}
           </p>
         )}
+        <Link
+          href="/forgot-password"
+          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+        >
+          {t.auth.forgotPasswordLink}
+        </Link>
         <Button type="submit" disabled={loading}>
           {loading ? t.auth.signingIn : t.auth.loginButton}
         </Button>

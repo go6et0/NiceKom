@@ -9,11 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/format";
 import { useLocale } from "@/components/site/locale-provider";
+import { useToast } from "@/components/ui/toast-provider";
 
 export default function CartPage() {
   const { items, subtotal, removeItem, updateQuantity, clear } = useCart();
   const { data: session } = useSession();
   const { t } = useLocale();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("");
@@ -36,6 +38,7 @@ export default function CartPage() {
     if (items.length === 0) {
       setMessage(t.cart.missingItems);
       setMessageType("error");
+      showToast(t.cart.missingItems, "error");
       setLoading(false);
       return;
     }
@@ -48,6 +51,7 @@ export default function CartPage() {
     ) {
       setMessage(t.cart.missingDetails);
       setMessageType("error");
+      showToast(t.cart.missingDetails, "error");
       setLoading(false);
       return;
     }
@@ -77,22 +81,29 @@ export default function CartPage() {
         const errorCode = data.error as string | undefined;
         if (errorCode === "INVALID_REQUEST") {
           setMessage(t.cart.orderInvalid);
+          showToast(t.cart.orderInvalid, "error");
         } else if (errorCode === "UNAUTHORIZED") {
           setMessage(t.cart.orderUnauthorized);
+          showToast(t.cart.orderUnauthorized, "error");
         } else if (errorCode === "PRODUCT_NOT_FOUND") {
           setMessage(t.cart.productNotFound);
+          showToast(t.cart.productNotFound, "error");
         } else if (errorCode === "INSUFFICIENT_STOCK") {
           const productName = typeof data.productName === "string" ? data.productName : null;
-          setMessage(
-            productName ? `${t.cart.stockError} (${productName})` : t.cart.stockError
-          );
+          const stockErrorMessage = productName
+            ? `${t.cart.stockError} (${productName})`
+            : t.cart.stockError;
+          setMessage(stockErrorMessage);
+          showToast(stockErrorMessage, "error");
         } else {
           setMessage(t.cart.orderError);
+          showToast(t.cart.orderError, "error");
         }
         setMessageType("error");
       } else {
         setMessage(t.cart.orderSuccess);
         setMessageType("success");
+        showToast(t.cart.orderSuccess, "success");
         clear();
         setCustomerName("");
         setCustomerPhone("");
@@ -101,8 +112,10 @@ export default function CartPage() {
     } catch (error) {
       if ((error as Error).name === "AbortError") {
         setMessage(t.cart.orderTimeout);
+        showToast(t.cart.orderTimeout, "error");
       } else {
         setMessage(t.cart.orderNetworkError);
+        showToast(t.cart.orderNetworkError, "error");
       }
       setMessageType("error");
     } finally {

@@ -19,19 +19,47 @@ export default async function AdminPage() {
     }),
   ]);
 
+  const [totalOrders, pendingOrders, acceptedOrders, completedOrders, lowStockCount, revenue] =
+    await Promise.all([
+      prisma.order.count(),
+      prisma.order.count({ where: { status: "PENDING" } }),
+      prisma.order.count({ where: { status: "ACCEPTED" } }),
+      prisma.order.count({ where: { status: "COMPLETED" } }),
+      prisma.product.count({ where: { quantity: { lte: 5 } } }),
+      prisma.order.aggregate({ _sum: { total: true } }),
+    ]);
+
+  const totalRevenue = Number(revenue._sum.total ?? 0);
+
   return (
     <div className="grid gap-8">
-      <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">{t.admin.totalProducts}</p>
-            <p className="text-3xl font-semibold">{products}</p>
-          </div>
-          <Button asChild>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+          <p className="text-sm text-muted-foreground">{t.admin.totalProducts}</p>
+          <p className="mt-2 text-3xl font-semibold">{products}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {lowStockCount} {t.admin.inStock} ≤ 5
+          </p>
+        </article>
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+          <p className="text-sm text-muted-foreground">{t.admin.orders}</p>
+          <p className="mt-2 text-3xl font-semibold">{totalOrders}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            P: {pendingOrders} | A: {acceptedOrders} | C: {completedOrders}
+          </p>
+        </article>
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+          <p className="text-sm text-muted-foreground">{t.orders.total}</p>
+          <p className="mt-2 text-3xl font-semibold">{formatCurrency(totalRevenue)}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t.orders.totalSpent}</p>
+        </article>
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+          <p className="text-sm text-muted-foreground">{t.admin.addProduct}</p>
+          <Button asChild className="mt-4 w-full">
             <Link href="/admin/products/new">{t.admin.addProduct}</Link>
           </Button>
-        </div>
-      </div>
+        </article>
+      </section>
 
       <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
         <h2 className="text-xl font-semibold">{t.admin.latestOrders}</h2>

@@ -15,6 +15,8 @@ type HomeProps = {
   >;
 };
 
+const PAGE_SIZE = 9;
+
 export default async function Home({ searchParams }: HomeProps) {
   const locale = await getLocale();
   const t = getDictionary(locale);
@@ -35,6 +37,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const viscosity = getParam("viscosity");
   const application = getParam("application");
   const certification = getParam("certification");
+  const query = getParam("q")?.trim();
   const baseOil = getParam("baseOil");
   const unit = getParam("unit");
   const availability = getParam("availability");
@@ -45,6 +48,9 @@ export default async function Home({ searchParams }: HomeProps) {
   const maxSize = parseNumber(getParam("maxSize"));
   const minTemp = parseNumber(getParam("minTemp"));
   const maxTemp = parseNumber(getParam("maxTemp"));
+  const pageParam = Number(getParam("page") ?? "1");
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
+  const skip = (page - 1) * PAGE_SIZE;
 
   const hasMinPrice = minPrice !== undefined;
   const hasMaxPrice = maxPrice !== undefined;
@@ -61,7 +67,33 @@ export default async function Home({ searchParams }: HomeProps) {
       : {};
   const certificationFilter = certification ? { certification } : {};
 
-  const where = {
+  let searchFilter: Prisma.ProductWhereInput = {};
+  if (query && query.length > 0) {
+    const containsFilter = (value: string) => ({
+      contains: value,
+      mode: Prisma.QueryMode.insensitive,
+    });
+
+    const orFilters: Prisma.ProductWhereInput[] = [
+      { name: containsFilter(query) },
+      { brand: containsFilter(query) },
+      { viscosity: containsFilter(query) },
+      { shortDescription: containsFilter(query) },
+      { description: containsFilter(query) },
+    ];
+
+    if (isBg) {
+      orFilters.push(
+        { shortDescriptionBg: containsFilter(query) },
+        { descriptionBg: containsFilter(query) }
+      );
+    }
+
+    searchFilter = { OR: orFilters };
+  }
+
+  const where: Prisma.ProductWhereInput = {
+    ...searchFilter,
     ...(brand ? { brand } : {}),
     ...(type ? { type: type as "OIL" | "GREASE" } : {}),
     ...(viscosity ? { viscosity } : {}),
@@ -131,6 +163,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   const [
     products,
+    productsCount,
     brands,
     viscosities,
     applicationItems,
@@ -141,6 +174,11 @@ export default async function Home({ searchParams }: HomeProps) {
     prisma.product.findMany({
       where,
       orderBy,
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.product.count({
+      where,
     }),
     prisma.product.findMany({
       distinct: ["brand"],
@@ -199,6 +237,7 @@ export default async function Home({ searchParams }: HomeProps) {
   };
 
   const hasFilters = [
+    query,
     brand,
     type,
     viscosity,
@@ -214,6 +253,28 @@ export default async function Home({ searchParams }: HomeProps) {
     hasMinTemp,
     hasMaxTemp,
   ].some((value) => Boolean(value));
+
+  const totalPages = Math.max(1, Math.ceil(productsCount / PAGE_SIZE));
+  const previousPage = page > 1 ? page - 1 : null;
+  const nextPage = page < totalPages ? page + 1 : null;
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    Object.entries(resolvedSearchParams).forEach(([key, value]) => {
+      if (key === "page") return;
+      if (Array.isArray(value)) {
+        if (value[0]) params.set(key, value[0]);
+        return;
+      }
+      if (value) params.set(key, value);
+    });
+
+    if (targetPage > 1) {
+      params.set("page", String(targetPage));
+    }
+
+    const qs = params.toString();
+    return qs ? `/?${qs}` : "/";
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-6 py-12">
@@ -271,25 +332,52 @@ export default async function Home({ searchParams }: HomeProps) {
               : t.home.emptyAll}
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => {
-              const text = getProductText(product, locale);
-              return (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={text.name}
-                  brand={product.brand}
-                  price={Number(product.price)}
-                  shortDescription={text.shortDescription}
-                  image={product.images[0]}
-                  type={product.type}
-                  quantity={product.quantity}
-                  unit={product.unit}
-                  packageSize={Number(product.packageSize)}
-                />
-              );
-            })}
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => {
+                const text = getProductText(product, locale);
+                return (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={text.name}
+                    brand={product.brand}
+                    price={Number(product.price)}
+                    shortDescription={text.shortDescription}
+                    image={product.images[0]}
+                    type={product.type}
+                    quantity={product.quantity}
+                    unit={product.unit}
+                    packageSize={Number(product.packageSize)}
+                  />
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              {previousPage ? (
+                <Link
+                  href={buildPageHref(previousPage)}
+                  className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+                >
+                  {t.home.previousPage}
+                </Link>
+              ) : (
+                <span />
+              )}
+              <p className="text-sm text-muted-foreground">
+                {t.home.pageLabel} {page} / {totalPages}
+              </p>
+              {nextPage ? (
+                <Link
+                  href={buildPageHref(nextPage)}
+                  className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+                >
+                  {t.home.nextPage}
+                </Link>
+              ) : (
+                <span />
+              )}
+            </div>
           </div>
         )}
       </section>

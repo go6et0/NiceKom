@@ -61,6 +61,21 @@ export default function ProductFilters({ options }: { options: FilterOptions }) 
         </Button>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Label
+            htmlFor="q"
+            className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
+          >
+            {t.filters.searchLabel}
+          </Label>
+          <Input
+            id="q"
+            name="q"
+            defaultValue={params.get("q") ?? ""}
+            placeholder={t.filters.searchPlaceholder}
+            className="h-10 w-full sm:w-72"
+          />
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Label
             htmlFor="sort"
             className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
           >

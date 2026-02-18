@@ -43,6 +43,8 @@ model User {
   emailVerified           DateTime?
   emailVerifyToken        String?
   emailVerifyTokenExpires DateTime?
+  passwordResetToken        String?
+  passwordResetTokenExpires DateTime?
   role                    Role     @default(USER)
   createdAt               DateTime @default(now())
 

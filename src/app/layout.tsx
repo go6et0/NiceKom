@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Sora } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Providers from "@/app/providers";
 import Navbar from "@/components/site/navbar";
@@ -19,6 +20,19 @@ const body = Sora({
 export const metadata: Metadata = {
   title: "NiceKom Oils",
   description: "Industrial oils and greases for modern machinery.",
+  metadataBase: new URL(process.env.NEXTAUTH_URL ?? "http://localhost:3000"),
+  openGraph: {
+    title: "NiceKom Oils",
+    description: "Industrial oils and greases for modern machinery.",
+    type: "website",
+    images: ["/og-image.svg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NiceKom Oils",
+    description: "Industrial oils and greases for modern machinery.",
+    images: ["/og-image.svg"],
+  },
 };
 
 export default async function RootLayout({
@@ -38,6 +52,7 @@ export default async function RootLayout({
             <Footer />
           </div>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

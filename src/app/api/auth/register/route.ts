@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createEmailVerifyToken } from "@/lib/auth";
+import { createEmailVerifyToken, passwordPolicy } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/mailer";
-
-const passwordPolicy = /^(?=.*[A-Z]).{8,}$/;
 
 const registerSchema = z
   .object({
@@ -66,7 +64,8 @@ export async function POST(request: Request) {
 
   try {
     await sendVerificationEmail(email, token);
-  } catch {
+  } catch (error) {
+    console.error("RegisterVerificationEmailError", error);
     await prisma.user
       .delete({ where: { id: user.id } })
       .catch(() => undefined);

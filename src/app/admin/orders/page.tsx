@@ -4,16 +4,39 @@ import { updateOrderStatus, deleteOrder } from "@/app/admin/orders/actions";
 import DeleteOrderButton from "@/components/admin/delete-order-button";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
+import Link from "next/link";
 
-export default async function OrdersPage() {
+type OrdersPageProps = {
+  searchParams:
+    | Promise<Record<string, string | string[] | undefined>>
+    | Record<string, string | string[] | undefined>;
+};
+
+const PAGE_SIZE = 12;
+
+export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const locale = await getLocale();
   const t = getDictionary(locale);
   const dateLocale = locale === "bg" ? "bg-BG" : "en-US";
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const rawPage = resolvedSearchParams.page;
+  const pageValue = Array.isArray(rawPage) ? rawPage[0] : rawPage;
+  const page = Math.max(1, Number(pageValue || "1") || 1);
+  const skip = (page - 1) * PAGE_SIZE;
 
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { items: true, user: true },
-  });
+  const [orders, totalOrders] = await Promise.all([
+    prisma.order.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { items: true, user: true },
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.order.count(),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalOrders / PAGE_SIZE));
+  const previousPage = page > 1 ? page - 1 : null;
+  const nextPage = page < totalPages ? page + 1 : null;
 
   const statusLabel = (status: string) =>
     t.order.status[status as keyof typeof t.order.status] ?? status;
@@ -82,6 +105,33 @@ export default async function OrdersPage() {
           ))}
         </div>
       )}
+      {orders.length > 0 ? (
+        <div className="mt-6 flex items-center justify-between gap-3">
+          {previousPage ? (
+            <Link
+              href={`/admin/orders?page=${previousPage}`}
+              className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+            >
+              {t.orders.previousPage}
+            </Link>
+          ) : (
+            <span />
+          )}
+          <p className="text-sm text-muted-foreground">
+            {t.orders.pageLabel} {page} / {totalPages}
+          </p>
+          {nextPage ? (
+            <Link
+              href={`/admin/orders?page=${nextPage}`}
+              className="rounded-md border border-border/60 px-3 py-2 text-sm hover:bg-background/70"
+            >
+              {t.orders.nextPage}
+            </Link>
+          ) : (
+            <span />
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
