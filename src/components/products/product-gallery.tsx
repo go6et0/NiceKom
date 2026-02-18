@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
+import ProductImage from "@/components/products/product-image";
 
 type ProductGalleryProps = {
   images: string[];
@@ -15,12 +15,12 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/60 bg-card/70 shadow-sm">
-        <Image
+        <ProductImage
           src={active}
           alt={name}
           fill
           sizes="(min-width: 1024px) 55vw, 100vw"
-          className="object-contain p-6"
+          className="bg-transparent object-contain p-6 dark:mix-blend-multiply"
           priority
           loading="eager"
         />
@@ -35,12 +35,12 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
               active === src ? "border-primary" : "border-border/60"
             }`}
           >
-            <Image
+            <ProductImage
               src={src}
               alt={name}
               fill
               sizes="96px"
-              className="object-cover"
+              className="bg-transparent object-contain p-1 dark:mix-blend-multiply"
             />
           </button>
         ))}

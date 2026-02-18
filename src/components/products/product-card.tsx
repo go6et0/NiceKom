@@ -1,10 +1,10 @@
 ﻿"use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/products/add-to-cart-button";
+import ProductImage from "@/components/products/product-image";
 import { formatCurrency } from "@/lib/format";
 import { useLocale } from "@/components/site/locale-provider";
 
@@ -37,18 +37,19 @@ export default function ProductCard({
   const unitLabel =
     unit === "LITERS" ? t.product.unitShort.LITERS : t.product.unitShort.KILOGRAMS;
   const typeLabel = t.product.type[type];
+
   return (
     <Card className="flex h-full flex-col overflow-hidden border-border/50 bg-card/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link
         href={`/products/${id}`}
         className="relative aspect-[4/3] w-full bg-card/70"
       >
-        <Image
+        <ProductImage
           src={image || "/placeholder.svg"}
           alt={name}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-contain p-3"
+          className="bg-transparent object-contain p-3 dark:mix-blend-multiply"
           loading="lazy"
         />
       </Link>
