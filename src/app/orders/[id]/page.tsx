@@ -25,13 +25,6 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
 
   if (!order) notFound();
 
-  const statusSteps: Array<keyof typeof t.order.status> = [
-    "PENDING",
-    "ACCEPTED",
-    "COMPLETED",
-  ];
-  const currentStep = statusSteps.indexOf(order.status as keyof typeof t.order.status);
-
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-6 py-12">
       <div className="flex flex-col gap-2">
@@ -45,23 +38,9 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
 
       <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold">{t.orders.status}</h2>
-        <ol className="mt-4 grid gap-2 sm:grid-cols-3">
-          {statusSteps.map((step, index) => {
-            const active = index <= currentStep;
-            return (
-              <li
-                key={step}
-                className={`rounded-xl border px-4 py-3 text-sm ${
-                  active
-                    ? "border-primary/50 bg-primary/10 text-foreground"
-                    : "border-border/60 bg-background/60 text-muted-foreground"
-                }`}
-              >
-                {t.order.status[step]}
-              </li>
-            );
-          })}
-        </ol>
+        <p className="mt-4 inline-flex rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-foreground">
+          {t.order.status[order.status as keyof typeof t.order.status] ?? order.status}
+        </p>
       </section>
 
       <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">

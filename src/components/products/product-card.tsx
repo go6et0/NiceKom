@@ -42,14 +42,14 @@ export default function ProductCard({
     <Card className="flex h-full flex-col overflow-hidden border-border/50 bg-card/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link
         href={`/products/${id}`}
-        className="relative aspect-[4/3] w-full bg-slate-100"
+        className="relative aspect-[4/3] w-full overflow-hidden bg-[radial-gradient(circle_at_18%_18%,rgba(148,163,184,0.28),transparent_42%),linear-gradient(155deg,rgba(226,232,240,0.68),rgba(248,250,252,0.9))] dark:bg-[radial-gradient(circle_at_18%_18%,rgba(148,163,184,0.16),transparent_42%),linear-gradient(155deg,rgba(30,41,59,0.72),rgba(2,6,23,0.92))]"
       >
         <Image
           src={image || "/placeholder.svg"}
           alt={name}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="bg-transparent object-contain p-3"
+          className="bg-transparent object-contain p-3 drop-shadow-[0_12px_18px_rgba(15,23,42,0.28)] dark:drop-shadow-[0_14px_20px_rgba(0,0,0,0.55)]"
           loading="lazy"
         />
       </Link>

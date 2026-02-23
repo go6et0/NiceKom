@@ -176,13 +176,13 @@ export default function CartPage() {
                 className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-24 overflow-hidden rounded-xl border border-border/60 bg-slate-100">
+                  <div className="relative h-20 w-24 overflow-hidden rounded-xl border border-border/60 bg-[linear-gradient(160deg,rgba(226,232,240,0.62),rgba(248,250,252,0.9))] dark:bg-[linear-gradient(160deg,rgba(30,41,59,0.75),rgba(2,6,23,0.92))]">
                     <Image
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
                       fill
                       sizes="96px"
-                      className="bg-transparent object-contain p-2"
+                      className="bg-transparent object-contain p-2 drop-shadow-[0_8px_10px_rgba(15,23,42,0.28)] dark:drop-shadow-[0_10px_12px_rgba(0,0,0,0.55)]"
                     />
                   </div>
                   <div>

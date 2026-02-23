@@ -24,7 +24,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const page = Math.max(1, Number(pageValue || "1") || 1);
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [orders, totalOrders, totals, latestOrder] = await Promise.all([
+  const [orders, totalOrders, latestOrder] = await Promise.all([
     prisma.order.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
@@ -35,10 +35,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     prisma.order.count({
       where: { userId: session.user.id },
     }),
-    prisma.order.aggregate({
-      where: { userId: session.user.id },
-      _sum: { total: true },
-    }),
     prisma.order.findFirst({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
@@ -47,7 +43,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalOrders / PAGE_SIZE));
-  const totalSpent = Number(totals._sum.total ?? 0);
   const latestOrderDate = latestOrder?.createdAt;
   const previousPage = page > 1 ? page - 1 : null;
   const nextPage = page < totalPages ? page + 1 : null;
@@ -59,14 +54,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         <p className="text-muted-foreground">{t.orders.subtitle}</p>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{t.orders.totalOrders}</p>
           <p className="mt-2 text-2xl font-semibold">{totalOrders}</p>
-        </article>
-        <article className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
-          <p className="text-sm text-muted-foreground">{t.orders.totalSpent}</p>
-          <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSpent)}</p>
         </article>
         <article className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{t.orders.latestOrder}</p>
