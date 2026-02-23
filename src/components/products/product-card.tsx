@@ -42,14 +42,14 @@ export default function ProductCard({
     <Card className="flex h-full flex-col overflow-hidden border-border/50 bg-card/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link
         href={`/products/${id}`}
-        className="relative aspect-[4/3] w-full bg-card/70"
+        className="relative aspect-[4/3] w-full bg-slate-100"
       >
         <Image
           src={image || "/placeholder.svg"}
           alt={name}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="bg-transparent object-contain p-3 dark:mix-blend-multiply"
+          className="bg-transparent object-contain p-3"
           loading="lazy"
         />
       </Link>

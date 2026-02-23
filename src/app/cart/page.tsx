@@ -176,13 +176,13 @@ export default function CartPage() {
                 className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="relative h-20 w-24 overflow-hidden rounded-xl border border-border/60 bg-background/70">
+                  <div className="relative h-20 w-24 overflow-hidden rounded-xl border border-border/60 bg-slate-100">
                     <Image
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
                       fill
                       sizes="96px"
-                      className="bg-transparent object-contain p-2 dark:mix-blend-multiply"
+                      className="bg-transparent object-contain p-2"
                     />
                   </div>
                   <div>
