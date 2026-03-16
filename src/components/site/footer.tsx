@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { Clock3, Mail, MapPin, Phone } from "lucide-react";
+import { auth } from "@/auth";
+import FooterLogoutLink from "@/components/site/footer-logout-link";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
 import { siteContact } from "@/lib/site-contact";
 
 export default async function Footer() {
+  const session = await auth();
+  const isAuthed = Boolean(session?.user);
   const locale = await getLocale();
   const t = getDictionary(locale);
   const currentYear = new Date().getFullYear();
@@ -69,22 +73,34 @@ export default async function Footer() {
             <Link href="/contact" className="text-muted-foreground transition hover:text-foreground">
               {t.nav.contact}
             </Link>
-            <Link href="/signup" className="text-muted-foreground transition hover:text-foreground">
-              {t.nav.signUp}
-            </Link>
-            <Link href="/login" className="text-muted-foreground transition hover:text-foreground">
-              {t.nav.login}
-            </Link>
+            {!isAuthed ? (
+              <>
+                <Link href="/signup" className="text-muted-foreground transition hover:text-foreground">
+                  {t.nav.signUp}
+                </Link>
+                <Link href="/login" className="text-muted-foreground transition hover:text-foreground">
+                  {t.nav.login}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/orders" className="text-muted-foreground transition hover:text-foreground">
+                  {t.nav.myOrders}
+                </Link>
+                <FooterLogoutLink />
+              </>
+            )}
           </nav>
         </section>
       </div>
 
       <div className="mx-auto mt-8 flex w-full max-w-7xl flex-col gap-2 border-t border-border/60 px-6 pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>
-          © {currentYear} NiceKom Oils. {t.footer.rights}
+          (c) {currentYear} NiceKom Oils. {t.footer.rights}
         </p>
         <p>{t.footer.legalCompany}</p>
       </div>
     </footer>
   );
 }
+
