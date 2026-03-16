@@ -140,33 +140,53 @@ export default function CartPage() {
         <div className="flex flex-col gap-6">
           <div className="grid gap-4 rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
             <h2 className="text-lg font-semibold">{t.cart.customerDetails}</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                placeholder={t.cart.fullName}
-                value={customerName}
-                onChange={(event) => setCustomerName(event.target.value)}
-                required
-              />
-              <Input
-                type="email"
-                placeholder={t.cart.email}
-                value={customerEmail}
-                onChange={(event) => setCustomerEmail(event.target.value)}
-                required
-              />
-              <Input
-                placeholder={t.cart.phone}
-                value={customerPhone}
-                onChange={(event) => setCustomerPhone(event.target.value)}
-                required
-              />
-              <Textarea
-                placeholder={t.cart.address}
-                value={customerAddress}
-                onChange={(event) => setCustomerAddress(event.target.value)}
-                rows={3}
-                required
-              />
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  01. {t.cart.fullName}
+                </p>
+                <Input
+                  placeholder={t.cart.fullName}
+                  value={customerName}
+                  onChange={(event) => setCustomerName(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  02. {t.cart.email}
+                </p>
+                <Input
+                  type="email"
+                  placeholder={t.cart.email}
+                  value={customerEmail}
+                  onChange={(event) => setCustomerEmail(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  03. {t.cart.phone}
+                </p>
+                <Input
+                  placeholder={t.cart.phone}
+                  value={customerPhone}
+                  onChange={(event) => setCustomerPhone(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  04. {t.cart.address}
+                </p>
+                <Textarea
+                  placeholder={t.cart.address}
+                  value={customerAddress}
+                  onChange={(event) => setCustomerAddress(event.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
             </div>
           </div>
           <div className="grid gap-4">

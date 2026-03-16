@@ -53,7 +53,7 @@ export default async function Footer() {
             <p className="flex items-center gap-2">
               <Clock3 size={16} />
               <span>
-                {t.footer.workingHoursLabel}: {siteContact.workingHours}
+                {t.footer.workingHoursLabel}: {t.footer.workingHoursValue}
               </span>
             </p>
           </div>
@@ -103,4 +103,3 @@ export default async function Footer() {
     </footer>
   );
 }
-
