@@ -38,7 +38,7 @@ export default async function AdminPage() {
           <p className="text-sm text-muted-foreground">{t.admin.totalProducts}</p>
           <p className="mt-2 text-3xl font-semibold">{products}</p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {lowStockCount} {t.admin.inStock} ≤ 5
+            {lowStockCount} {t.admin.inStock} {"<="} 5
           </p>
         </article>
         <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
@@ -68,22 +68,23 @@ export default async function AdminPage() {
         ) : (
           <div className="mt-4 space-y-4">
             {orders.map((order) => (
-              <div
-                key={order.id}
-                className="flex flex-col gap-3 border-b border-border/50 pb-4 text-sm last:border-none last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div>
-                  <p className="font-semibold">{order.customerName}</p>
-                  <p className="text-muted-foreground">
-                    {order.items.length} {t.admin.items} |{" "}
-                    {t.order.status[order.status as keyof typeof t.order.status] ??
-                      order.status}{" "}
-                    | {new Date(order.createdAt).toLocaleDateString(dateLocale)}
+              <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-4">
+                <div className="space-y-1">
+                  <p className="text-base font-semibold">{order.customerName}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t.orders.orderDate}: {new Date(order.createdAt).toLocaleDateString(dateLocale)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t.orders.items}: {order.items.length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t.orders.status}:{" "}
+                    {t.order.status[order.status as keyof typeof t.order.status] ?? order.status}
+                  </p>
+                  <p className="pt-1 text-base font-semibold">
+                    {formatCurrency(Number(order.total))}
                   </p>
                 </div>
-                <p className="text-base font-semibold">
-                  {formatCurrency(Number(order.total))}
-                </p>
               </div>
             ))}
           </div>
@@ -95,3 +96,4 @@ export default async function AdminPage() {
     </div>
   );
 }
+

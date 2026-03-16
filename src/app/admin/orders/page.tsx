@@ -49,17 +49,23 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       ) : (
         <div className="mt-4 space-y-6">
           {orders.map((order) => (
-            <div key={order.id} className="border-b border-border/50 pb-4">
-              <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-semibold">{order.customerName}</p>
-                  <p className="text-muted-foreground">
-                    {order.customerEmail} | {order.customerPhone}
+            <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1 text-base">
+                  <p className="font-semibold tracking-wide">{order.customerName}</p>
+                  <p>
+                    <span className="text-muted-foreground">{t.cart.email}: </span>
+                    {order.customerEmail}
                   </p>
-                  <p className="text-muted-foreground">
+                  <p>
+                    <span className="text-muted-foreground">{t.cart.phone}: </span>
+                    {order.customerPhone}
+                  </p>
+                  <p>
+                    <span className="text-muted-foreground">{t.cart.address}: </span>
                     {order.customerAddress}
                   </p>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {new Date(order.createdAt).toLocaleString(dateLocale)}
                   </p>
                 </div>
@@ -67,37 +73,43 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                   {formatCurrency(Number(order.total))}
                 </p>
               </div>
-              <div className="mt-3 flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-center">
-                <span className="font-semibold">
+
+              <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border/50 bg-card/70 p-3 text-base sm:flex-row sm:items-center sm:justify-between">
+                <p className="font-semibold">
                   {t.admin.status}: {statusLabel(order.status)}
-                </span>
-                <form
-                  action={updateOrderStatus.bind(null, order.id)}
-                  className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
-                >
-                  <select
-                    name="status"
-                    defaultValue={order.status}
-                    className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm sm:min-w-40"
+                </p>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                  <form
+                    action={updateOrderStatus.bind(null, order.id)}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
                   >
-                    <option value="PENDING">{t.order.status.PENDING}</option>
-                    <option value="ACCEPTED">{t.order.status.ACCEPTED}</option>
-                    <option value="COMPLETED">{t.order.status.COMPLETED}</option>
-                  </select>
-                  <button
-                    type="submit"
-                    className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:ml-2"
-                  >
-                    {t.admin.save}
-                  </button>
-                </form>
-                <DeleteOrderButton action={deleteOrder.bind(null, order.id)} />
+                    <select
+                      name="status"
+                      defaultValue={order.status}
+                      className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm sm:min-w-44"
+                    >
+                      <option value="PENDING">{t.order.status.PENDING}</option>
+                      <option value="ACCEPTED">{t.order.status.ACCEPTED}</option>
+                      <option value="COMPLETED">{t.order.status.COMPLETED}</option>
+                    </select>
+                    <button
+                      type="submit"
+                      className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:ml-2"
+                    >
+                      {t.admin.save}
+                    </button>
+                  </form>
+                  <DeleteOrderButton action={deleteOrder.bind(null, order.id)} />
+                </div>
               </div>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+
+              <ul className="mt-3 space-y-2">
                 {order.items.map((item) => (
-                  <li key={item.id}>
-                    {item.name} | {item.quantity} x{" "}
-                    {formatCurrency(Number(item.price))}
+                  <li key={item.id} className="rounded-lg border border-border/50 bg-card/70 px-3 py-2">
+                    <p className="text-base font-medium">{item.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.quantity} x {formatCurrency(Number(item.price))}
+                    </p>
                   </li>
                 ))}
               </ul>

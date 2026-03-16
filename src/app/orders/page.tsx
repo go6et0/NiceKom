@@ -62,9 +62,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         <article className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{t.orders.latestOrder}</p>
           <p className="mt-2 text-2xl font-semibold">
-            {latestOrderDate
-              ? new Date(latestOrderDate).toLocaleDateString(dateLocale)
-              : "-"}
+            {latestOrderDate ? new Date(latestOrderDate).toLocaleDateString(dateLocale) : "-"}
           </p>
         </article>
       </section>
@@ -75,32 +73,28 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         ) : (
           <div className="space-y-5">
             {orders.map((order) => (
-              <article
-                key={order.id}
-                className="rounded-xl border border-border/60 bg-background/60 p-4"
-              >
-                <div className="flex flex-col gap-2 text-sm sm:flex-row sm:items-center sm:justify-between">
-                  <p className="font-semibold">
+              <article key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-5">
+                <div className="flex flex-col gap-2 text-base sm:flex-row sm:items-start sm:justify-between">
+                  <p className="font-semibold tracking-wide">
                     {t.orders.orderId}: {order.id.slice(-8).toUpperCase()}
                   </p>
                   <p className="text-muted-foreground">
-                    {t.orders.orderDate}:{" "}
-                    {new Date(order.createdAt).toLocaleString(dateLocale)}
+                    {t.orders.orderDate}: {new Date(order.createdAt).toLocaleString(dateLocale)}
                   </p>
                 </div>
-                <div className="mt-3 flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-                  <span>
-                    {t.orders.status}:{" "}
-                    {t.order.status[order.status as keyof typeof t.order.status] ??
-                      order.status}
-                  </span>
-                  <span>
+
+                <div className="mt-4 grid gap-2 rounded-lg border border-border/50 bg-card/70 p-3 text-sm md:grid-cols-3">
+                  <p className="text-muted-foreground">
+                    {t.orders.status}: {t.order.status[order.status as keyof typeof t.order.status] ?? order.status}
+                  </p>
+                  <p className="text-muted-foreground">
                     {t.orders.items}: {order.items.length}
-                  </span>
-                  <span>
+                  </p>
+                  <p className="text-muted-foreground">
                     {t.orders.total}: {formatCurrency(Number(order.total))}
-                  </span>
+                  </p>
                 </div>
+
                 <div className="mt-3">
                   <Link
                     href={`/orders/${order.id}`}
@@ -109,17 +103,36 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     {t.orders.viewDetails}
                   </Link>
                 </div>
-                <div className="mt-3 rounded-lg border border-border/60 bg-card/80 p-3 text-sm">
-                  <p className="font-medium">{t.orders.customerDetails}</p>
-                  <p className="mt-1 text-muted-foreground">
-                    {order.customerName} | {order.customerEmail} | {order.customerPhone}
-                  </p>
-                  <p className="text-muted-foreground">{order.customerAddress}</p>
+
+                <div className="mt-3 rounded-lg border border-border/60 bg-card/80 p-3">
+                  <p className="text-sm font-semibold">{t.orders.customerDetails}</p>
+                  <div className="mt-2 grid gap-1 text-base">
+                    <p>
+                      <span className="text-muted-foreground">{t.cart.fullName}: </span>
+                      {order.customerName}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">{t.cart.email}: </span>
+                      {order.customerEmail}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">{t.cart.phone}: </span>
+                      {order.customerPhone}
+                    </p>
+                    <p>
+                      <span className="text-muted-foreground">{t.cart.address}: </span>
+                      {order.customerAddress}
+                    </p>
+                  </div>
                 </div>
-                <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+
+                <ul className="mt-3 space-y-2">
                   {order.items.map((item) => (
-                    <li key={item.id}>
-                      {item.name} | {item.quantity} x {formatCurrency(Number(item.price))}
+                    <li key={item.id} className="rounded-lg border border-border/50 bg-card/70 px-3 py-2">
+                      <p className="text-base font-medium">{item.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.quantity} x {formatCurrency(Number(item.price))}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -127,6 +140,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
             ))}
           </div>
         )}
+
         {totalOrders > 0 ? (
           <div className="mt-6 flex items-center justify-between gap-3">
             {previousPage ? (
@@ -158,3 +172,4 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     </main>
   );
 }
+

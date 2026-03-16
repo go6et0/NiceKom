@@ -45,16 +45,16 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
 
       <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold">{t.orders.items}</h2>
-        <ul className="mt-4 space-y-2 text-sm">
+        <ul className="mt-4 space-y-2">
           {order.items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-col gap-1 rounded-lg border border-border/50 bg-background/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              className="rounded-lg border border-border/50 bg-background/60 px-4 py-3"
             >
-              <span className="font-medium">{item.name}</span>
-              <span className="text-muted-foreground">
+              <p className="text-base font-medium">{item.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {item.quantity} x {formatCurrency(Number(item.price))}
-              </span>
+              </p>
             </li>
           ))}
         </ul>
@@ -63,12 +63,26 @@ export default async function OrderDetailsPage({ params }: OrderDetailsPageProps
         </p>
       </section>
 
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm text-sm">
+      <section className="rounded-2xl border border-border/60 bg-card/80 p-6 shadow-sm">
         <h2 className="text-lg font-semibold">{t.orders.customerDetails}</h2>
-        <p className="mt-3 text-muted-foreground">
-          {order.customerName} | {order.customerEmail} | {order.customerPhone}
-        </p>
-        <p className="text-muted-foreground">{order.customerAddress}</p>
+        <div className="mt-3 grid gap-2 text-base">
+          <p>
+            <span className="text-muted-foreground">{t.cart.fullName}: </span>
+            {order.customerName}
+          </p>
+          <p>
+            <span className="text-muted-foreground">{t.cart.email}: </span>
+            {order.customerEmail}
+          </p>
+          <p>
+            <span className="text-muted-foreground">{t.cart.phone}: </span>
+            {order.customerPhone}
+          </p>
+          <p>
+            <span className="text-muted-foreground">{t.cart.address}: </span>
+            {order.customerAddress}
+          </p>
+        </div>
       </section>
     </main>
   );

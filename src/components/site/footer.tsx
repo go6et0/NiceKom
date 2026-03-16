@@ -48,7 +48,7 @@ export default async function Footer() {
             </a>
             <p className="flex items-center gap-2">
               <MapPin size={16} />
-              {siteContact.address}
+              {t.footer.addressValue}
             </p>
             <p className="flex items-center gap-2">
               <Clock3 size={16} />

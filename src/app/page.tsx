@@ -289,11 +289,11 @@ export default async function Home({ searchParams }: HomeProps) {
           <p className="max-w-xl text-lg text-muted-foreground">
             {t.home.heroSubtitle}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
+          <div className="grid w-full max-w-sm gap-3 sm:grid-cols-2">
+            <Button asChild className="h-11 w-full">
               <Link href="#shop">{t.home.ctaBrowse}</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="h-11 w-full">
               <Link href="/about">{t.home.ctaWhy}</Link>
             </Button>
           </div>
