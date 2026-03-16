@@ -73,11 +73,18 @@ export default function SignupPage() {
     }
     window.clearTimeout(timeoutId);
 
+    const data = await response.json().catch(() => null);
+    const errorCode =
+      data && typeof data === "object" && "error" in data
+        ? String((data as { error?: unknown }).error)
+        : undefined;
+
     if (!response.ok) {
-      const data = await response.json();
-      const errorCode = data.error as string | undefined;
       const errorText =
-        errorCode === "EMAIL_SEND_FAILED"
+        errorCode === "EMAIL_SEND_FAILED" ||
+        errorCode === "EMAIL_SEND_TIMEOUT" ||
+        errorCode === "EMAIL_SERVER_NOT_CONFIGURED" ||
+        errorCode === "EMAIL_DOMAIN_NOT_VERIFIED"
           ? t.auth.signupEmailError
           : errorCode === "EMAIL_EXISTS"
           ? t.auth.signupExists
@@ -85,14 +92,17 @@ export default function SignupPage() {
           ? t.auth.passwordRequirements
           : errorCode === "PASSWORD_MISMATCH"
           ? t.auth.passwordMismatch
-          : data.error || t.auth.signupError;
+          : t.auth.signupError;
+
       setMessage({ type: "error", text: errorText });
       showToast(errorText, "error");
-    } else {
-      setMessage({ type: "success", text: t.auth.signupSuccess });
-      showToast(t.auth.signupSuccess, "success");
-      (event.target as HTMLFormElement).reset();
+      setLoading(false);
+      return;
     }
+
+    setMessage({ type: "success", text: t.auth.signupSuccess });
+    showToast(t.auth.signupSuccess, "success");
+    (event.target as HTMLFormElement).reset();
     setLoading(false);
   };
 
