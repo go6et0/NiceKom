@@ -42,18 +42,18 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     t.order.status[status as keyof typeof t.order.status] ?? status;
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+    <div className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
       <h2 className="text-xl font-semibold">{t.admin.orders}</h2>
       {orders.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">{t.admin.noOrders}</p>
       ) : (
         <div className="mt-4 space-y-6">
           {orders.map((order) => (
-            <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-3 sm:p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-1 text-base">
+                <div className="space-y-1 text-sm sm:text-base">
                   <p className="font-semibold tracking-wide">{order.customerName}</p>
-                  <p>
+                  <p className="break-all">
                     <span className="text-muted-foreground">{t.cart.email}: </span>
                     {order.customerEmail}
                   </p>
@@ -61,7 +61,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     <span className="text-muted-foreground">{t.cart.phone}: </span>
                     {order.customerPhone}
                   </p>
-                  <p>
+                  <p className="break-words">
                     <span className="text-muted-foreground">{t.cart.address}: </span>
                     {order.customerAddress}
                   </p>
@@ -69,24 +69,24 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     {new Date(order.createdAt).toLocaleString(dateLocale)}
                   </p>
                 </div>
-                <p className="text-base font-semibold">
+                <p className="text-base font-semibold sm:text-right">
                   {formatCurrency(Number(order.total))}
                 </p>
               </div>
 
-              <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border/50 bg-card/70 p-3 text-base sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-4 flex flex-col gap-3 rounded-lg border border-border/50 bg-card/70 p-3 text-sm sm:text-base sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-semibold">
                   {t.admin.status}: {statusLabel(order.status)}
                 </p>
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                   <form
                     action={updateOrderStatus.bind(null, order.id)}
-                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-2"
                   >
                     <select
                       name="status"
                       defaultValue={order.status}
-                      className="rounded-md border border-border/60 bg-background px-3 py-2 text-sm sm:min-w-44"
+                      className="h-10 rounded-md border border-border/60 bg-background px-3 text-sm sm:min-w-44"
                     >
                       <option value="PENDING">{t.order.status.PENDING}</option>
                       <option value="ACCEPTED">{t.order.status.ACCEPTED}</option>
@@ -94,12 +94,12 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     </select>
                     <button
                       type="submit"
-                      className="rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground sm:ml-2"
+                      className="h-10 rounded-md bg-primary px-4 text-xs font-semibold text-primary-foreground"
                     >
                       {t.admin.save}
                     </button>
                   </form>
-                  <DeleteOrderButton action={deleteOrder.bind(null, order.id)} />
+                  <DeleteOrderButton action={deleteOrder.bind(null, order.id)} className="h-10 w-full sm:w-auto" />
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         </div>
       )}
       {orders.length > 0 ? (
-        <div className="mt-6 flex items-center justify-between gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {previousPage ? (
             <Link
               href={`/admin/orders?page=${previousPage}`}
@@ -127,7 +127,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               {t.orders.previousPage}
             </Link>
           ) : (
-            <span />
+            <span className="hidden sm:inline" />
           )}
           <p className="text-sm text-muted-foreground">
             {t.orders.pageLabel} {page} / {totalPages}

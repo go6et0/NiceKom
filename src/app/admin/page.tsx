@@ -34,26 +34,26 @@ export default async function AdminPage() {
   return (
     <div className="grid gap-8">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
           <p className="text-sm text-muted-foreground">{t.admin.totalProducts}</p>
           <p className="mt-2 text-3xl font-semibold">{products}</p>
           <p className="mt-2 text-xs text-muted-foreground">
             {lowStockCount} {t.admin.inStock} {"<="} 5
           </p>
         </article>
-        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
           <p className="text-sm text-muted-foreground">{t.admin.orders}</p>
           <p className="mt-2 text-3xl font-semibold">{totalOrders}</p>
           <p className="mt-2 text-xs text-muted-foreground">
             P: {pendingOrders} | A: {acceptedOrders} | C: {completedOrders}
           </p>
         </article>
-        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
           <p className="text-sm text-muted-foreground">{t.orders.total}</p>
           <p className="mt-2 text-3xl font-semibold">{formatCurrency(totalRevenue)}</p>
           <p className="mt-2 text-xs text-muted-foreground">{t.orders.totalSpent}</p>
         </article>
-        <article className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+        <article className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
           <p className="text-sm text-muted-foreground">{t.admin.addProduct}</p>
           <Button asChild className="mt-4 w-full">
             <Link href="/admin/products/new">{t.admin.addProduct}</Link>
@@ -61,14 +61,14 @@ export default async function AdminPage() {
         </article>
       </section>
 
-      <div className="rounded-3xl border border-border/60 bg-card/80 p-6 shadow-sm">
+      <div className="rounded-3xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-6">
         <h2 className="text-xl font-semibold">{t.admin.latestOrders}</h2>
         {orders.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">{t.admin.noOrders}</p>
         ) : (
           <div className="mt-4 space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-4">
+              <div key={order.id} className="rounded-xl border border-border/60 bg-background/60 p-3 sm:p-4">
                 <div className="space-y-1">
                   <p className="text-base font-semibold">{order.customerName}</p>
                   <p className="text-sm text-muted-foreground">
@@ -96,4 +96,3 @@ export default async function AdminPage() {
     </div>
   );
 }
-

@@ -16,15 +16,17 @@ import { useLocale } from "@/components/site/locale-provider";
 
 export default function DeleteOrderButton({
   action,
+  className,
 }: {
   action: (formData: FormData) => void;
+  className?: string;
 }) {
   const { t } = useLocale();
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm">
+        <Button variant="destructive" size="sm" className={className}>
           {t.admin.delete}
         </Button>
       </AlertDialogTrigger>
