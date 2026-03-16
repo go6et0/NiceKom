@@ -11,7 +11,10 @@ import {
 } from "react";
 
 export type CartItem = {
+  lineId: string;
   productId: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   price: number;
   image?: string;
@@ -22,8 +25,8 @@ export type CartItem = {
 type CartContextValue = {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (lineId: string) => void;
+  updateQuantity: (lineId: string, quantity: number) => void;
   clear: () => void;
   subtotal: number;
 };
@@ -39,7 +42,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return;
     try {
-      setItems(JSON.parse(stored));
+      const parsed = JSON.parse(stored) as Array<
+        Partial<CartItem> & { productId: string; quantity: number }
+      >;
+      setItems(
+        parsed.map((item) => ({
+          lineId: item.lineId ?? item.variantId ?? item.productId,
+          productId: item.productId,
+          variantId: item.variantId,
+          variantLabel: item.variantLabel,
+          name: item.name ?? "",
+          price: Number(item.price ?? 0),
+          image: item.image,
+          quantity: Number(item.quantity ?? 1),
+          maxQuantity: Number(item.maxQuantity ?? item.quantity ?? 1),
+        }))
+      );
     } catch {
       setItems([]);
     }
@@ -51,10 +69,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
-      const existing = prev.find((p) => p.productId === item.productId);
+      const existing = prev.find((p) => p.lineId === item.lineId);
       if (!existing) return [...prev, item];
       return prev.map((p) =>
-        p.productId === item.productId
+        p.lineId === item.lineId
           ? {
               ...p,
               quantity: Math.min(
@@ -67,14 +85,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((item) => item.productId !== productId));
+  const removeItem = (lineId: string) => {
+    setItems((prev) => prev.filter((item) => item.lineId !== lineId));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (lineId: string, quantity: number) => {
     setItems((prev) =>
       prev.map((item) =>
-        item.productId === productId
+        item.lineId === lineId
           ? {
               ...item,
               quantity: Math.max(1, Math.min(quantity, item.maxQuantity)),

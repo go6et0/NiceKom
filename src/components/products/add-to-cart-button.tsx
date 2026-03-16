@@ -8,6 +8,8 @@ import { useToast } from "@/components/ui/toast-provider";
 
 type AddToCartButtonProps = {
   productId: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   price: number;
   image?: string;
@@ -16,6 +18,8 @@ type AddToCartButtonProps = {
 
 export default function AddToCartButton({
   productId,
+  variantId,
+  variantLabel,
   name,
   price,
   image,
@@ -31,7 +35,10 @@ export default function AddToCartButton({
     <Button
       onClick={() => {
         addItem({
+          lineId: variantId ?? productId,
           productId,
+          variantId,
+          variantLabel,
           name,
           price,
           image,

@@ -176,6 +176,11 @@ export default async function Home({ searchParams }: HomeProps) {
       orderBy,
       skip,
       take: PAGE_SIZE,
+      include: {
+        variants: {
+          orderBy: { sortOrder: "asc" },
+        },
+      },
     }),
     prisma.product.count({
       where,
@@ -336,19 +341,32 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => {
                 const text = getProductText(product, locale);
+                const displayVariant = product.variants[0];
+                const displayPackageSize = Number(
+                  displayVariant?.packageSize ?? product.packageSize
+                );
+                const displayUnit = displayVariant?.unit ?? product.unit;
+                const displayPrice = Number(displayVariant?.price ?? product.price);
+                const displayQuantity = displayVariant?.quantity ?? product.quantity;
+                const unitShort =
+                  displayUnit === "LITERS"
+                    ? t.product.unitShort.LITERS
+                    : t.product.unitShort.KILOGRAMS;
                 return (
                   <ProductCard
                     key={product.id}
                     id={product.id}
+                    variantId={displayVariant?.id}
+                    variantLabel={`${displayPackageSize} ${unitShort}`}
                     name={text.name}
                     brand={product.brand}
-                    price={Number(product.price)}
+                    price={displayPrice}
                     shortDescription={text.shortDescription}
                     image={product.images[0]}
                     type={product.type}
-                    quantity={product.quantity}
-                    unit={product.unit}
-                    packageSize={Number(product.packageSize)}
+                    quantity={displayQuantity}
+                    unit={displayUnit}
+                    packageSize={displayPackageSize}
                   />
                 );
               })}

@@ -70,6 +70,7 @@ export default function CartPage() {
           customerAddress,
           items: items.map((item) => ({
             productId: item.productId,
+            variantId: item.variantId,
             quantity: item.quantity,
           })),
         }),
@@ -192,7 +193,7 @@ export default function CartPage() {
           <div className="grid gap-4">
             {items.map((item) => (
               <div
-                key={item.productId}
+                key={item.lineId}
                 className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
@@ -207,6 +208,9 @@ export default function CartPage() {
                   </div>
                   <div>
                     <h3 className="text-base font-semibold">{item.name}</h3>
+                    {item.variantLabel ? (
+                      <p className="text-sm text-muted-foreground">{item.variantLabel}</p>
+                    ) : null}
                     <p className="text-sm text-muted-foreground">
                       {formatCurrency(item.price)} {t.cart.each}
                     </p>
@@ -222,13 +226,13 @@ export default function CartPage() {
                     onChange={(event) => {
                       const next = Number(event.target.value);
                       if (!Number.isNaN(next)) {
-                        updateQuantity(item.productId, next);
+                        updateQuantity(item.lineId, next);
                       }
                     }}
                   />
                   <Button
                     variant="outline"
-                    onClick={() => removeItem(item.productId)}
+                    onClick={() => removeItem(item.lineId)}
                   >
                     {t.cart.remove}
                   </Button>

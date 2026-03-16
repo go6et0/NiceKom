@@ -20,9 +20,16 @@ export default async function EditProductPage({
 
   const product = await prisma.product.findUnique({
     where: { id: resolvedParams.id },
+    include: {
+      variants: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
 
   if (!product) notFound();
+  const primaryVariant = product.variants[0];
+  const additionalVariants = product.variants.slice(1);
 
   return (
     <div className="max-w-3xl">
@@ -38,16 +45,22 @@ export default async function EditProductPage({
           advantagesBg: product.advantagesBg ?? undefined,
           type: product.type,
           viscosity: product.viscosity,
-          unit: product.unit,
-          packageSize: Number(product.packageSize),
+          unit: primaryVariant?.unit ?? product.unit,
+          packageSize: Number(primaryVariant?.packageSize ?? product.packageSize),
           application: product.application,
           applicationBg: product.applicationBg ?? undefined,
           certification: product.certification,
           baseOil: product.baseOil,
           operatingTempMin: product.operatingTempMin,
           operatingTempMax: product.operatingTempMax,
-          price: Number(product.price),
-          quantity: product.quantity,
+          price: Number(primaryVariant?.price ?? product.price),
+          quantity: primaryVariant?.quantity ?? product.quantity,
+          additionalVariants: additionalVariants.map((variant) => ({
+            packageSize: Number(variant.packageSize),
+            unit: variant.unit,
+            price: Number(variant.price),
+            quantity: variant.quantity,
+          })),
           images: product.images,
         }}
         action={updateProduct.bind(null, product.id)}

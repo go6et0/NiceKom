@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductGallery from "@/components/products/product-gallery";
-import AddToCartButton from "@/components/products/add-to-cart-button";
+import ProductPurchasePanel from "@/components/products/product-purchase-panel";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/format";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@/lib/i18n";
 import { getProductText } from "@/lib/product-text";
@@ -24,6 +23,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const product = await prisma.product.findUnique({
     where: { id: resolvedParams.id },
+    include: {
+      variants: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
 
   if (!product) notFound();
@@ -33,6 +37,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
     product.unit === "LITERS"
       ? t.product.unit.LITERS
       : t.product.unit.KILOGRAMS;
+  const variants =
+    product.variants.length > 0
+      ? product.variants.map((variant) => ({
+          id: variant.id,
+          packageSize: Number(variant.packageSize),
+          unit: variant.unit,
+          price: Number(variant.price),
+          quantity: variant.quantity,
+        }))
+      : [
+          {
+            id: `fallback-${product.id}`,
+            packageSize: Number(product.packageSize),
+            unit: product.unit,
+            price: Number(product.price),
+            quantity: product.quantity,
+          },
+        ];
   const baseOilLabel =
     product.baseOil === "MINERAL"
       ? t.product.baseOil.MINERAL
@@ -58,12 +80,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </p>
         <p className="text-lg text-muted-foreground">{text.description}</p>
         <div className="grid gap-3 rounded-2xl border border-border/60 bg-card/80 p-5 text-sm shadow-sm">
-          <div className="flex items-center justify-between">
-            <span>{t.product.packageSize}</span>
-            <span className="font-medium">
-              {Number(product.packageSize)} {unitLabel}
-            </span>
-          </div>
           {text.application && (
             <div className="flex items-center justify-between">
               <span>{t.product.application}</span>
@@ -102,12 +118,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <span>{t.product.availableQuantity}</span>
             <span className="font-medium">{product.quantity}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span>{t.product.price}</span>
-            <span className="text-lg font-semibold">
-              {formatCurrency(Number(product.price))}
-            </span>
-          </div>
         </div>
         <div className="flex flex-col gap-3">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -119,12 +129,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             ))}
           </ul>
         </div>
-        <AddToCartButton
+        <ProductPurchasePanel
           productId={product.id}
-          name={text.name}
-          price={Number(product.price)}
+          productName={text.name}
           image={product.images[0]}
-          maxQuantity={product.quantity}
+          variants={variants}
         />
       </div>
     </main>

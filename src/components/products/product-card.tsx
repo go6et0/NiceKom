@@ -10,6 +10,8 @@ import { useLocale } from "@/components/site/locale-provider";
 
 type ProductCardProps = {
   id: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   brand: string;
   price: number;
@@ -23,6 +25,8 @@ type ProductCardProps = {
 
 export default function ProductCard({
   id,
+  variantId,
+  variantLabel,
   name,
   brand,
   price,
@@ -61,7 +65,7 @@ export default function ProductCard({
           <Badge variant="secondary">{typeLabel}</Badge>
         </div>
         <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          {brand} • {packageSize} {unitLabel}
+          {brand} • {variantLabel ?? `${packageSize} ${unitLabel}`}
         </p>
         {quantity === 0 && (
           <span className="text-xs font-semibold uppercase text-destructive">
@@ -76,6 +80,8 @@ export default function ProductCard({
         </span>
         <AddToCartButton
           productId={id}
+          variantId={variantId}
+          variantLabel={variantLabel ?? `${packageSize} ${unitLabel}`}
           name={name}
           price={price}
           image={image}

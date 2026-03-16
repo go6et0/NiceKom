@@ -37,6 +37,12 @@ type ProductFormValues = {
   operatingTempMax?: number | null;
   price: number;
   quantity: number;
+  additionalVariants?: Array<{
+    packageSize: number;
+    unit: "LITERS" | "KILOGRAMS";
+    price: number;
+    quantity: number;
+  }>;
   images: string[];
 };
 
@@ -73,6 +79,21 @@ export default function ProductForm({
   const [unit, setUnit] = useState<ProductFormValues["unit"]>(
     defaultValues?.unit ?? "LITERS"
   );
+  const [additionalVariants, setAdditionalVariants] = useState<
+    Array<{
+      packageSize: string;
+      unit: "LITERS" | "KILOGRAMS";
+      price: string;
+      quantity: string;
+    }>
+  >(
+    (defaultValues?.additionalVariants ?? []).map((variant) => ({
+      packageSize: String(variant.packageSize),
+      unit: variant.unit,
+      price: String(variant.price),
+      quantity: String(variant.quantity),
+    }))
+  );
   const [baseOil, setBaseOil] = useState<
     ProductFormValues["baseOil"] | "NONE"
   >(defaultValues?.baseOil ?? "NONE");
@@ -97,6 +118,7 @@ export default function ProductForm({
     setType("OIL");
     setUnit("LITERS");
     setBaseOil("NONE");
+    setAdditionalVariants([]);
   }, [formState.status, resetOnSuccess]);
 
   const handleFiles = async (files: FileList | null) => {
@@ -407,22 +429,129 @@ export default function ProductForm({
             required
           />
         </div>
-        <div className="grid gap-2">
-          <Label htmlFor="images">{formLabels.images}</Label>
-          <Input
-            id="images"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(event) => handleFiles(event.target.files)}
-          />
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          {missingImages && (
-            <p className="text-sm text-muted-foreground">
-              {formLabels.uploadMissing}
-            </p>
-          )}
+      </div>
+
+      <div className="grid gap-3 rounded-2xl border border-border/60 bg-background/40 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold">{formLabels.additionalPackSizes}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setAdditionalVariants((prev) => [
+                ...prev,
+                { packageSize: "", unit, price: "", quantity: "" },
+              ])
+            }
+          >
+            {formLabels.addPackSize}
+          </Button>
         </div>
+        {additionalVariants.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{formLabels.noAdditionalPackSizes}</p>
+        ) : (
+          <div className="space-y-3">
+            {additionalVariants.map((variant, index) => (
+              <div
+                key={`${index}-${variant.packageSize}-${variant.price}`}
+                className="grid gap-3 rounded-xl border border-border/60 bg-card/70 p-3 md:grid-cols-[1fr_1fr_1fr_1fr_auto]"
+              >
+                <Input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder={formLabels.packageSize}
+                  name="extraPackageSize"
+                  value={variant.packageSize}
+                  onChange={(event) =>
+                    setAdditionalVariants((prev) =>
+                      prev.map((row, rowIndex) =>
+                        rowIndex === index
+                          ? { ...row, packageSize: event.target.value }
+                          : row
+                      )
+                    )
+                  }
+                />
+                <select
+                  name="extraUnit"
+                  value={variant.unit}
+                  onChange={(event) =>
+                    setAdditionalVariants((prev) =>
+                      prev.map((row, rowIndex) =>
+                        rowIndex === index
+                          ? { ...row, unit: event.target.value as "LITERS" | "KILOGRAMS" }
+                          : row
+                      )
+                    )
+                  }
+                  className="h-9 rounded-md border border-border/60 bg-background px-3 text-sm"
+                >
+                  <option value="LITERS">{t.product.unit.LITERS}</option>
+                  <option value="KILOGRAMS">{t.product.unit.KILOGRAMS}</option>
+                </select>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder={formLabels.price}
+                  name="extraPrice"
+                  value={variant.price}
+                  onChange={(event) =>
+                    setAdditionalVariants((prev) =>
+                      prev.map((row, rowIndex) =>
+                        rowIndex === index ? { ...row, price: event.target.value } : row
+                      )
+                    )
+                  }
+                />
+                <Input
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder={formLabels.availableQuantity}
+                  name="extraQuantity"
+                  value={variant.quantity}
+                  onChange={(event) =>
+                    setAdditionalVariants((prev) =>
+                      prev.map((row, rowIndex) =>
+                        rowIndex === index ? { ...row, quantity: event.target.value } : row
+                      )
+                    )
+                  }
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setAdditionalVariants((prev) =>
+                      prev.filter((_, rowIndex) => rowIndex !== index)
+                    )
+                  }
+                >
+                  {formLabels.remove}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="images">{formLabels.images}</Label>
+        <Input
+          id="images"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(event) => handleFiles(event.target.files)}
+        />
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        {missingImages && (
+          <p className="text-sm text-muted-foreground">{formLabels.uploadMissing}</p>
+        )}
       </div>
       <div className="grid gap-4">
         <div className="flex flex-wrap gap-3">

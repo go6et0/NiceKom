@@ -34,6 +34,13 @@ const productSchema = z.object({
   images: z.array(z.string().url()).min(1),
 });
 
+const variantSchema = z.object({
+  packageSize: z.coerce.number().positive(),
+  unit: z.enum(["LITERS", "KILOGRAMS"]),
+  price: z.coerce.number().positive(),
+  quantity: z.coerce.number().int().nonnegative(),
+});
+
 function normalizeText(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : value;
 }
@@ -56,8 +63,8 @@ function parseProductForm(formData: FormData) {
     advantagesBg: normalizeText(formData.get("advantagesBg")),
     type: normalizeText(formData.get("type")),
     viscosity: normalizeText(formData.get("viscosity")),
-    unit: normalizeText(formData.get("unit")),
     packageSize: normalizeNumber(formData.get("packageSize")),
+    unit: normalizeText(formData.get("unit")),
     application: normalizeText(formData.get("application")),
     applicationBg: normalizeText(formData.get("applicationBg")),
     certification: normalizeText(formData.get("certification")),
@@ -66,6 +73,10 @@ function parseProductForm(formData: FormData) {
     operatingTempMax: normalizeNumber(formData.get("operatingTempMax")),
     price: normalizeNumber(formData.get("price")),
     quantity: normalizeNumber(formData.get("quantity")),
+    extraPackageSizes: formData.getAll("extraPackageSize"),
+    extraUnits: formData.getAll("extraUnit"),
+    extraPrices: formData.getAll("extraPrice"),
+    extraQuantities: formData.getAll("extraQuantity"),
     images: formData.getAll("images"),
   };
 
@@ -100,8 +111,62 @@ function parseProductForm(formData: FormData) {
     throw new Error(`Invalid product data. ${details}`);
   }
 
+  const extraVariantsRaw = raw.extraPackageSizes.map((value, index) => ({
+    packageSize:
+      typeof value === "string" && value.trim() !== ""
+        ? value.replace(",", ".").trim()
+        : undefined,
+    unit:
+      typeof raw.extraUnits[index] === "string"
+        ? raw.extraUnits[index]
+        : undefined,
+    price:
+      typeof raw.extraPrices[index] === "string" && raw.extraPrices[index].trim() !== ""
+        ? raw.extraPrices[index].replace(",", ".").trim()
+        : undefined,
+    quantity:
+      typeof raw.extraQuantities[index] === "string" &&
+      raw.extraQuantities[index].trim() !== ""
+        ? raw.extraQuantities[index].trim()
+        : undefined,
+  }));
+
+  const normalizedExtraVariants = extraVariantsRaw.filter(
+    (variant) =>
+      variant.packageSize !== undefined ||
+      variant.price !== undefined ||
+      variant.quantity !== undefined
+  );
+
+  const parsedExtraVariants = normalizedExtraVariants.map((variant) => {
+    const parsedVariant = variantSchema.safeParse(variant);
+    if (!parsedVariant.success) {
+      const details = parsedVariant.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join("; ");
+      throw new Error(`Invalid additional variant data. ${details}`);
+    }
+    return parsedVariant.data;
+  });
+
+  const baseVariant = variantSchema.parse({
+    packageSize: parsed.data.packageSize,
+    unit: parsed.data.unit,
+    price: parsed.data.price,
+    quantity: parsed.data.quantity,
+  });
+
+  const variants = [baseVariant, ...parsedExtraVariants];
+  const totalQuantity = variants.reduce((sum, variant) => sum + variant.quantity, 0);
+  const primaryVariant = variants[0];
+
   return {
     ...parsed.data,
+    packageSize: primaryVariant.packageSize,
+    unit: primaryVariant.unit,
+    price: primaryVariant.price,
+    quantity: totalQuantity,
+    variants,
     advantages: parsed.data.advantages
       .split("\n")
       .map((item) => item.trim())
@@ -122,9 +187,21 @@ export async function createProduct(
   try {
     await requireAdmin();
     const data = parseProductForm(formData);
+    const { variants, ...productData } = data;
 
     await prisma.product.create({
-      data,
+      data: {
+        ...productData,
+        variants: {
+          create: variants.map((variant, index) => ({
+            packageSize: variant.packageSize,
+            unit: variant.unit,
+            price: variant.price,
+            quantity: variant.quantity,
+            sortOrder: index,
+          })),
+        },
+      },
     });
 
     revalidatePath("/");
@@ -147,10 +224,23 @@ export async function updateProduct(
   try {
     await requireAdmin();
     const data = parseProductForm(formData);
+    const { variants, ...productData } = data;
 
     await prisma.product.update({
       where: { id: productId },
-      data,
+      data: {
+        ...productData,
+        variants: {
+          deleteMany: {},
+          create: variants.map((variant, index) => ({
+            packageSize: variant.packageSize,
+            unit: variant.unit,
+            price: variant.price,
+            quantity: variant.quantity,
+            sortOrder: index,
+          })),
+        },
+      },
     });
 
     revalidatePath("/");
