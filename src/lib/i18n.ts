@@ -24,6 +24,12 @@ const dictionary = {
     footer: {
       line1: "NiceKom Industrial Lubricants",
       line2: "Built for modern machinery, delivered with care.",
+      contactsTitle: "Contacts",
+      quickLinksTitle: "Quick links",
+      workingHoursLabel: "Working hours",
+      legalNote: "Support and ordering every business day.",
+      rights: "All rights reserved.",
+      legalCompany: "NiceKom Oils Ltd.",
     },
     home: {
       heroTag: "Industrial lubricants",
@@ -315,6 +321,12 @@ const dictionary = {
     footer: {
       line1: "NiceKom индустриални смазки",
       line2: "Създадени за модерни машини, доставени с грижа.",
+      contactsTitle: "Контакти",
+      quickLinksTitle: "Бързи връзки",
+      workingHoursLabel: "Работно време",
+      legalNote: "Поддръжка и поръчки през всеки работен ден.",
+      rights: "Всички права запазени.",
+      legalCompany: "НайсКом Ойлс ЕООД",
     },
     home: {
       heroTag: "Индустриални смазки",
