@@ -35,6 +35,28 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "nicekom-cart";
 
+function normalizeLoadedItem(
+  item: Partial<CartItem> & { productId: string; quantity: number }
+): CartItem {
+  const safeQuantity = Math.max(1, Math.trunc(Number(item.quantity || 1)));
+  const safeMax = Math.max(
+    safeQuantity,
+    Math.trunc(Number(item.maxQuantity ?? safeQuantity))
+  );
+
+  return {
+    lineId: item.lineId ?? item.variantId ?? item.productId,
+    productId: item.productId,
+    variantId: item.variantId,
+    variantLabel: item.variantLabel,
+    name: item.name ?? "",
+    price: Number(item.price ?? 0),
+    image: item.image,
+    quantity: Math.min(safeQuantity, safeMax),
+    maxQuantity: safeMax,
+  };
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
@@ -45,19 +67,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const parsed = JSON.parse(stored) as Array<
         Partial<CartItem> & { productId: string; quantity: number }
       >;
-      setItems(
-        parsed.map((item) => ({
-          lineId: item.lineId ?? item.variantId ?? item.productId,
-          productId: item.productId,
-          variantId: item.variantId,
-          variantLabel: item.variantLabel,
-          name: item.name ?? "",
-          price: Number(item.price ?? 0),
-          image: item.image,
-          quantity: Number(item.quantity ?? 1),
-          maxQuantity: Number(item.maxQuantity ?? item.quantity ?? 1),
-        }))
-      );
+      setItems(parsed.map(normalizeLoadedItem));
     } catch {
       setItems([]);
     }

@@ -58,6 +58,13 @@ export default function CartPage() {
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+    const normalizedItems = items
+      .map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: Math.max(1, Math.trunc(Number(item.quantity || 1))),
+      }))
+      .filter((item) => item.productId && item.quantity > 0);
 
     try {
       const response = await fetch("/api/orders", {
@@ -68,11 +75,7 @@ export default function CartPage() {
           customerEmail,
           customerPhone,
           customerAddress,
-          items: items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            quantity: item.quantity,
-          })),
+          items: normalizedItems,
         }),
         signal: controller.signal,
       });

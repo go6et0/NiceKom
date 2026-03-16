@@ -35,8 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
   }
 
-  const { customerName, customerEmail, customerPhone, customerAddress } =
-    parsed.data;
+  const { customerName, customerEmail, customerPhone, customerAddress } = parsed.data;
   const items = Array.from(
     parsed.data.items.reduce((acc, item) => {
       const key = item.variantId ? `${item.productId}:${item.variantId}` : item.productId;
@@ -50,22 +49,35 @@ export async function POST(request: Request) {
     }, new Map<string, { productId: string; variantId?: string; quantity: number }>())
   ).map(([, value]) => value);
 
+  const uniqueProductIds = Array.from(new Set(items.map((item) => item.productId)));
   const products = await prisma.product.findMany({
-    where: { id: { in: items.map((item) => item.productId) } },
+    where: { id: { in: uniqueProductIds } },
+    include: {
+      variants: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
   });
 
-  if (products.length !== items.length) {
+  if (products.length !== uniqueProductIds.length) {
     return NextResponse.json({ error: "PRODUCT_NOT_FOUND" }, { status: 404 });
   }
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const productMap = new Map(products.map((product) => [product.id, product]));
+  const itemsWithResolvedVariant = items.map((item) => {
+    if (item.variantId) return item;
+    const fallbackVariant = productMap.get(item.productId)?.variants[0];
+    return fallbackVariant ? { ...item, variantId: fallbackVariant.id } : item;
+  });
+
   const variantIds = Array.from(
     new Set(
-      items
+      itemsWithResolvedVariant
         .map((item) => item.variantId)
         .filter((value): value is string => Boolean(value))
     )
   );
+
   const variants = variantIds.length
     ? await prisma.productVariant.findMany({
         where: { id: { in: variantIds } },
@@ -73,12 +85,12 @@ export async function POST(request: Request) {
     : [];
   const variantMap = new Map(variants.map((variant) => [variant.id, variant]));
 
-  if (variantIds.length !== variants.length) {
+  if (variants.length !== variantIds.length) {
     return NextResponse.json({ error: "PRODUCT_NOT_FOUND" }, { status: 404 });
   }
 
   try {
-    const total = items.reduce((sum, item) => {
+    const total = itemsWithResolvedVariant.reduce((sum, item) => {
       const variant = item.variantId ? variantMap.get(item.variantId) : null;
       const product = productMap.get(item.productId);
       const price = variant ? Number(variant.price) : Number(product?.price ?? 0);
@@ -86,12 +98,12 @@ export async function POST(request: Request) {
     }, 0);
 
     const order = await prisma.$transaction(async (tx) => {
-      for (const item of items) {
+      for (const item of itemsWithResolvedVariant) {
         if (item.variantId) {
           const variant = variantMap.get(item.variantId);
           const product = productMap.get(item.productId);
           if (!variant || variant.productId !== item.productId) {
-            throw new Error("INVALID_REQUEST");
+            throw new Error("PRODUCT_NOT_FOUND");
           }
 
           const updatedVariant = await tx.productVariant.updateMany({
@@ -101,7 +113,7 @@ export async function POST(request: Request) {
 
           if (updatedVariant.count === 0) {
             const name = product ? getProductText(product, locale).name : "";
-            const unitLabel = variant.unit === "LITERS" ? (locale === "bg" ? "л" : "L") : locale === "bg" ? "кг" : "kg";
+            const unitLabel = variant.unit === "LITERS" ? "L" : "kg";
             throw new Error(
               `INSUFFICIENT_STOCK:${name} ${Number(variant.packageSize)} ${unitLabel}`
             );
@@ -111,17 +123,18 @@ export async function POST(request: Request) {
             where: { id: item.productId },
             data: { quantity: { decrement: item.quantity } },
           });
-        } else {
-          const updated = await tx.product.updateMany({
-            where: { id: item.productId, quantity: { gte: item.quantity } },
-            data: { quantity: { decrement: item.quantity } },
-          });
+          continue;
+        }
 
-          if (updated.count === 0) {
-            const product = productMap.get(item.productId);
-            const name = product ? getProductText(product, locale).name : "";
-            throw new Error(`INSUFFICIENT_STOCK:${name}`);
-          }
+        const updated = await tx.product.updateMany({
+          where: { id: item.productId, quantity: { gte: item.quantity } },
+          data: { quantity: { decrement: item.quantity } },
+        });
+
+        if (updated.count === 0) {
+          const product = productMap.get(item.productId);
+          const name = product ? getProductText(product, locale).name : "";
+          throw new Error(`INSUFFICIENT_STOCK:${name}`);
         }
       }
 
@@ -134,19 +147,11 @@ export async function POST(request: Request) {
           customerPhone,
           customerAddress,
           items: {
-            create: items.map((item) => {
+            create: itemsWithResolvedVariant.map((item) => {
               const product = productMap.get(item.productId)!;
               const variant = item.variantId ? variantMap.get(item.variantId) : null;
               const text = getProductText(product, locale);
-              const unitLabel = variant
-                ? variant.unit === "LITERS"
-                  ? locale === "bg"
-                    ? "л"
-                    : "L"
-                  : locale === "bg"
-                    ? "кг"
-                    : "kg"
-                : null;
+              const unitLabel = variant ? (variant.unit === "LITERS" ? "L" : "kg") : null;
               return {
                 productId: product.id,
                 name: variant
@@ -164,8 +169,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, orderId: order.id });
   } catch (error) {
-    if (error instanceof Error && error.message === "INVALID_REQUEST") {
-      return NextResponse.json({ error: "INVALID_REQUEST" }, { status: 400 });
+    if (error instanceof Error && error.message === "PRODUCT_NOT_FOUND") {
+      return NextResponse.json({ error: "PRODUCT_NOT_FOUND" }, { status: 404 });
     }
 
     if (error instanceof Error && error.message.startsWith("INSUFFICIENT_STOCK")) {
@@ -180,3 +185,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ORDER_FAILED" }, { status: 500 });
   }
 }
+
