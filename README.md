@@ -1,103 +1,94 @@
 # NiceKom Oils
 
-Modern e-commerce app for selling industrial machine oils and greases. Built with Next.js App Router, Tailwind CSS, shadcn/ui, Prisma, PostgreSQL, Auth.js (NextAuth), Cloudinary, and Nodemailer.
+Уеб приложение за електронна търговия със смазочни масла и греси за машини и автомобили. Проектът е разработен с `Next.js`, `TypeScript`, `Tailwind CSS`, `shadcn/ui`, `Prisma`, `PostgreSQL`, `Auth.js (NextAuth)`, `Cloudinary` и `Nodemailer`.
 
-## Project URL
+## URL адрес на проекта
 
-Production deployment:
+Работещата версия на приложението е достъпна на:
 
 `https://nice-kom.vercel.app`
 
-## Access to the Application
+## Достъп до приложението
 
-### User Access
+### Потребителски акаунт
 
-A standard user account can be created from the public registration page:
+- Имейл: `demo.user@nicekom.com`
+- Парола: `NiceKomUser2026!`
 
-`https://nice-kom.vercel.app/signup`
-
-After registration, the user must verify the email address before logging in. The login page is available at:
+Вход в системата:
 
 `https://nice-kom.vercel.app/login`
 
-### Admin Access
+Страница за регистрация:
 
-The project does not store hardcoded public admin credentials in the repository.
+`https://nice-kom.vercel.app/signup`
 
-Admin access is role-based. To create an administrator account:
+### Администраторски акаунт
 
-1. Register a normal user account from the application.
-2. Verify the email address.
-3. Update the user role in the database to `ADMIN`.
+- Имейл: `g.genchev39@gmail.com`
+- Парола: `6649Georgi`
 
-Example SQL:
-
-```sql
-update "User"
-set role = 'ADMIN'
-where email = 'admin@nicekom.com';
-```
-
-After the role is updated, the administrator can access the admin panel from:
+Административен панел:
 
 `https://nice-kom.vercel.app/admin`
 
-## Core Functionality
+## Основни функционалности
 
-- Email/password authentication with email verification
-- Role-based access control for `USER` and `ADMIN`
-- Product catalog with filtering and product variants
-- Cart and checkout flow
-- Order creation and order status tracking
-- Admin panel for product and order management
-- Cloudinary image upload and storage
-- Email notifications for verification, password reset, and order status changes
+- Регистрация и вход с имейл и парола
+- Потвърждение на имейл при създаване на акаунт
+- Разделение на роли `USER` и `ADMIN`
+- Продуктов каталог с филтриране и варианти на продуктите
+- Количка и създаване на поръчка
+- Преглед на поръчки от потребителския профил
+- Административен панел за управление на продукти и поръчки
+- Качване и съхранение на изображения чрез `Cloudinary`
+- Изпращане на системни имейли чрез `Nodemailer` и SMTP
 
-## Local Setup
+## Локално стартиране
 
-1. Install dependencies:
+1. Инсталиране на зависимостите:
 
 ```bash
 npm install
 ```
 
-2. Copy the environment template:
+2. Копиране на примерния env файл:
 
 ```bash
 cp .env.example .env.local
 ```
 
-3. Configure the environment variables in `.env.local`.
+3. Попълване на необходимите променливи в `.env.local`.
 
-4. Run the database migrations:
+4. Изпълнение на миграциите:
 
 ```bash
 npx prisma migrate dev --name init
 ```
 
-5. Start the development server:
+5. Стартиране на development сървъра:
 
 ```bash
 npm run dev
 ```
 
-6. Open:
+6. Отваряне на:
 
 `http://localhost:3000`
 
-## Required Environment Variables
+## Необходими environment променливи
 
-### Database
+### База данни
 
 - `DATABASE_URL`
 - `DIRECT_URL`
 
-### Authentication
+### Автентикация
 
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL`
 
-### Email / SMTP
+### Имейл / SMTP
 
 - `EMAIL_SERVER_HOST`
 - `EMAIL_SERVER_PORT`
@@ -110,15 +101,15 @@ npm run dev
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
 - `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET`
 
-## External Services Used
+## Използвани външни услуги
 
-- `Cloudinary` for product image storage and delivery
-- `Nodemailer` with SMTP transport for email sending
-- `PostgreSQL` / `Neon` for the database layer
-- `Vercel` for deployment
+- `Cloudinary` за съхранение и зареждане на продуктови изображения
+- `Nodemailer` със SMTP транспорт за изпращане на имейли
+- `PostgreSQL` / `Neon` за базата данни
+- `Vercel` за deployment на приложението
 
-## Notes
+## Бележки
 
-- A newly registered account has role `USER` by default.
-- Email verification is required before login.
-- Administrator access is protected by the `ADMIN` role in the database.
+- Новорегистрираният акаунт по подразбиране е с роля `USER`.
+- Достъпът до административния панел е ограничен само за акаунти с роля `ADMIN`.
+- Приложението изисква коректно конфигурирани база данни, SMTP и `Cloudinary`, за да работят всички функционалности.
